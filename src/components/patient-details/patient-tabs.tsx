@@ -9,7 +9,6 @@ import { EmptyStateCard } from "./empty-state-card";
 import { MediaUploadCard } from "./media-upload-card";
 import { Patient } from "@/lib/definitions";
 
-
 interface PatientTabsProps {
   patient: Patient;
 }

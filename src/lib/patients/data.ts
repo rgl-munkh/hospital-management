@@ -1,3 +1,5 @@
+'use server'
+
 import { db } from "@/database/connection";
 import { sql } from "drizzle-orm";
 import { patients } from "@/database/schema";
@@ -30,16 +32,7 @@ export async function fetchFilteredPatients(
 
   try {
     const data = await db
-      .select({
-        id: patients.id,
-        patientCode: patients.patientCode,
-        firstName: patients.firstName,
-        lastName: patients.lastName,
-        age: patients.age,
-        gender: patients.gender,
-        emergencyName: patients.emergencyName,
-        emergencyPhone: patients.emergencyPhone,
-      })
+      .select()
       .from(patients)
       .where(
         sql`${patients.patientCode} ILIKE ${`%${query}%`} OR

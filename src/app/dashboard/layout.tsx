@@ -1,4 +1,4 @@
-import { DashboardSidebar } from "@/app/ui/sidebar";
+import { DashboardSidebar } from "@/components/sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
 export default function DashboardLayout({

@@ -1,5 +1,3 @@
-"use client";
-
 interface PatientHeaderProps {
   firstName: string;
   lastName: string;

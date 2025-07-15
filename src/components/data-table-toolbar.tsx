@@ -1,43 +1,43 @@
-"use client"
+"use client";
 
-import { X } from "lucide-react"
-import { Table } from "@tanstack/react-table"
-import { useSearchParams, usePathname, useRouter } from "next/navigation"
-import { useDebouncedCallback } from "use-debounce"
-
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { DataTableViewOptions } from "./data-table-view-options"
-import { DataTableFacetedFilter } from "./data-table-faceted-filter"
+import { X } from "lucide-react";
+import { Table } from "@tanstack/react-table";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
+import { useDebouncedCallback } from "use-debounce";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { DataTableViewOptions } from "@/components/data-table-view-options";
+import { DataTableFacetedFilter } from "@/components/data-table-faceted-filter";
 
 interface DataTableToolbarProps<TData> {
-  table: Table<TData>
+  table: Table<TData>;
 }
 
 export function DataTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
-  const searchParams = useSearchParams()
-  const pathname = usePathname()
-  const { replace } = useRouter()
-  const isFiltered = table.getState().columnFilters.length > 0
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+
+  const isFiltered = table.getState().columnFilters.length > 0;
 
   const handleSearch = useDebouncedCallback((term: string) => {
-    const params = new URLSearchParams(searchParams)
+    const params = new URLSearchParams(searchParams);
     if (term) {
-      params.set('query', term)
+      params.set("query", term);
     } else {
-      params.delete('query')
+      params.delete("query");
     }
-    replace(`${pathname}?${params.toString()}`)
-  }, 300)
+    replace(`${pathname}?${params.toString()}`);
+  }, 300);
 
   return (
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center space-x-2">
         <Input
           placeholder="Filter patients..."
-          defaultValue={searchParams.get('query')?.toString()}
+          defaultValue={searchParams.get("query")?.toString()}
           onChange={(event) => handleSearch(event.target.value)}
           className="h-8 w-[150px] lg:w-[250px]"
         />
@@ -65,5 +65,5 @@ export function DataTableToolbar<TData>({
       </div>
       <DataTableViewOptions table={table} />
     </div>
-  )
-} 
+  );
+}

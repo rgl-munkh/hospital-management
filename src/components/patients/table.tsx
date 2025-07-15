@@ -1,6 +1,6 @@
 "use client";
 
-import { DataTable } from "@/app/ui/data-table";
+import { DataTable } from "@/components/data-table";
 import { columns } from "./columns";
 import { Patient } from "@/lib/definitions";
 

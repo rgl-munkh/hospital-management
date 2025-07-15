@@ -1,10 +1,7 @@
-import { fetchPatientById } from "@/lib/patients/actions";
-import {
-  BreadcrumbNav,
-  PatientHeader,
-  PatientTabs,
-} from "@/app/ui/patient-details";
+import { fetchPatientById } from "@/lib/patients";
+import { PatientHeader, PatientTabs } from "@/components/patient-details";
 import { notFound } from "next/navigation";
+import { Breadcrumb } from "@/components/breadcrumb";
 
 export default async function PatientViewPage({
   params,
@@ -15,13 +12,17 @@ export default async function PatientViewPage({
 
   const patientData = await fetchPatientById(patientId);
 
-  if (!patientData) {
-    notFound();
-  }
+  if (!patientData) return notFound();
 
   return (
     <div className="space-y-6 w-full max-w-6xl mx-auto p-6">
-      <BreadcrumbNav currentPage="View Patient" />
+      <Breadcrumb
+        paths={[
+          { label: "Dashboard", href: "/dashboard" },
+          { label: "Patients", href: "/dashboard/patients" },
+          { label: "View Patient", href: `/dashboard/patients/${patientId}` },
+        ]}
+      />
       <PatientHeader
         firstName={patientData.firstName}
         lastName={patientData.lastName}
@@ -31,4 +32,3 @@ export default async function PatientViewPage({
     </div>
   );
 }
- 

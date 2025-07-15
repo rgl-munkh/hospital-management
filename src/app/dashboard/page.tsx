@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <div>
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <p className="text-muted-foreground">
@@ -74,8 +74,8 @@ export default function DashboardPage() {
               Common tasks and shortcuts
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Link href="/dashboard/patients/create/basic">
+          <CardContent className="flex flex-col gap-2">
+            <Link href="/dashboard/patients/create">
               <Card className="p-4 hover:bg-muted/50 cursor-pointer transition-colors">
                 <div className="flex items-center space-x-3">
                   <Plus className="h-5 w-5 text-primary" />

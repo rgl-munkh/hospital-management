@@ -1,3 +1,4 @@
+import { Breadcrumb } from "@/components/breadcrumb";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -6,14 +7,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { BreadcrumbNav } from "@/app/ui/patient-details";
 import { AlertTriangle, ArrowLeft, Search } from "lucide-react";
 import Link from "next/link";
 
 export default function PatientNotFound() {
   return (
     <div className="space-y-6 w-full max-w-2xl mx-auto p-6">
-      <BreadcrumbNav currentPage="Patient Not Found" />
+      <Breadcrumb
+        paths={[
+          { label: "Dashboard", href: "/dashboard" },
+          { label: "Patients", href: "/dashboard/patients" },
+          { label: "Patient Not Found", href: "/dashboard/patients/not-found" },
+        ]}
+      />
 
       <Card>
         <CardHeader className="text-center">
