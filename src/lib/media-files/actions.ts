@@ -1,9 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import {
-  fetchPatientMediaFiles as fetchPatientMediaFilesData,
-} from "@/lib/media-files/data";
+import { fetchPatientMediaFiles as fetchPatientMediaFilesData } from "@/lib/media-files/data";
 import { db } from "@/database/connection";
 import { mediaFiles } from "@/database/schema";
 
@@ -33,12 +31,5 @@ export async function saveMediaFile(
   }
 }
 
-export async function fetchPatientMediaFiles(patientId: string) {
-  try {
-    const mediaFiles = await fetchPatientMediaFilesData(patientId);
-    return mediaFiles;
-  } catch (error) {
-    console.error("Failed to fetch patient media files:", error);
-    throw new Error("Failed to fetch patient media files.");
-  }
-} 
+// Export the data function directly instead of wrapping it
+export { fetchPatientMediaFilesData as fetchPatientMediaFiles }; 

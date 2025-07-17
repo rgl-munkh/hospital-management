@@ -5,9 +5,9 @@ import { User, Pill, Image as ImageIcon, Box } from "lucide-react";
 import { PersonalInfoCard } from "./personal-info-card";
 import { PhysicalMeasurementsCard } from "./physical-measurements-card";
 import { EmergencyContactCard } from "./emergency-contact-card";
-import { EmptyStateCard } from "./empty-state-card";
 import { MediaUploadCard } from "./media-upload-card";
 import { Patient } from "@/lib/definitions";
+import { StlViewCard } from "./stl-view-card";
 
 interface PatientTabsProps {
   patient: Patient;
@@ -64,13 +64,13 @@ export function PatientTabs({ patient }: PatientTabsProps) {
 
       {/* Prescription Tab */}
       <TabsContent value="prescription" className="space-y-6">
-        <EmptyStateCard
+        {/* <EmptyStateCard
           title="Prescription Information"
           description="No prescription data available"
           icon={Pill}
           actionText="Add Prescription"
           actionHref={`/dashboard/patients/${patient.id}/edit?tab=prescription`}
-        />
+        /> */}
       </TabsContent>
 
       {/* Media Tab */}
@@ -80,12 +80,7 @@ export function PatientTabs({ patient }: PatientTabsProps) {
 
       {/* STL Model Tab */}
       <TabsContent value="model" className="space-y-6">
-        <EmptyStateCard
-          title="3D Model Information"
-          icon={Box}
-          actionText="Upload STL Model"
-          actionHref={`/dashboard/patients/${patient.id}/edit?tab=model`}
-        />
+        <StlViewCard />
       </TabsContent>
     </Tabs>
   );
