@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Scan } from "lucide-react";
 import Link from "next/link";
 import { Patient } from "@/lib/definitions";
 import { DeleteDialog } from "./delete-dialog";
@@ -70,12 +70,19 @@ export const columns: ColumnDef<Patient>[] = [
       return (
         <div className="flex justify-end gap-2">
           <Button variant="outline" size="sm" asChild>
+            <Link
+              href={`/dashboard/patients/${patient.id}/3d-process/upload-mesh`}
+            >
+              <Scan className="h-4 w-4" />
+            </Link>
+          </Button>
+          <Button variant="outline" size="sm" asChild>
             <Link href={`/dashboard/patients/${patient.id}`}>
               <ChevronRight className="h-4 w-4" />
             </Link>
           </Button>
-          <DeleteDialog 
-            patientId={patient.id} 
+          <DeleteDialog
+            patientId={patient.id}
             patientName={`${patient.firstName} ${patient.lastName}`}
           />
         </div>

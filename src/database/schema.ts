@@ -102,6 +102,7 @@ export const mediaFiles = pgTable("media_files", {
 export const scans = pgTable("scans", {
   id: uuid("id").primaryKey().defaultRandom(),
   patientId: uuid("patient_id").notNull().references(() => patients.id),
+  // TODO: Convert to enum ["raw_file", "processed_file"]
   type: text("type"),
   fileUrl: text("file_url").notNull(),
   version: integer("version").default(1),
