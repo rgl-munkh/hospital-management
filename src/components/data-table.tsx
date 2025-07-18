@@ -27,6 +27,7 @@ import {
 import { DataTablePagination } from "./data-table-pagination";
 import { DataTableToolbar } from "./data-table-toolbar";
 import { useState } from "react";
+import { TableConfig } from "@/lib/table-factory";
 
 export interface FilterOption {
   label: string;
@@ -42,15 +43,13 @@ export interface FilterConfig {
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  searchPlaceholder?: string;
-  filters?: FilterConfig[];
+  config?: TableConfig;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  searchPlaceholder,
-  filters,
+  config,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -86,8 +85,8 @@ export function DataTable<TData, TValue>({
     <div className="space-y-4">
       <DataTableToolbar 
         table={table} 
-        searchPlaceholder={searchPlaceholder}
-        filters={filters}
+        searchPlaceholder={config?.searchPlaceholder}
+        filters={config?.filters}
       />
       <div className="rounded-md border">
         <Table>

@@ -1,6 +1,6 @@
 "use client";
 
-import { GenericTable } from "@/components/generic-table";
+import { DataTable } from "@/components/data-table";
 import { columns } from "./columns";
 import { Patient } from "@/lib/definitions";
 import { patientTableConfig } from "@/lib/table-configs";
@@ -10,5 +10,5 @@ interface PatientsTableProps {
 }
 
 export default function PatientsTable({ patients }: PatientsTableProps) {
-  return <GenericTable columns={columns} data={patients} config={patientTableConfig} />;
+  return <DataTable columns={columns} data={patients} config={patientTableConfig} />;
 }
