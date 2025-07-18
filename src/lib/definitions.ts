@@ -1,16 +1,32 @@
 // This file contains type definitions for your data.
 // Using Drizzle's generated types for better type safety and consistency.
 
-import { InferSelectModel, InferInsertModel } from 'drizzle-orm';
-import { users, patients, roles, userRoles, prescriptions, diagnoses, mediaFiles, scans, externalFiles, auditLogs } from '@/database/schema';
+import { InferSelectModel, InferInsertModel } from "drizzle-orm";
+import {
+  users,
+  patients,
+  hospitals,
+  roles,
+  userRoles,
+  prescriptions,
+  diagnoses,
+  mediaFiles,
+  scans,
+  externalFiles,
+  auditLogs,
+} from "@/database/schema";
 
-// User types
+// User types 
 export type User = InferSelectModel<typeof users>;
 export type NewUser = InferInsertModel<typeof users>;
 
 // Patient types
 export type Patient = InferSelectModel<typeof patients>;
 export type NewPatient = InferInsertModel<typeof patients>;
+
+// Hospital types
+export type Hospital = InferSelectModel<typeof hospitals>;
+export type NewHospital = InferInsertModel<typeof hospitals>;
 
 // Role types
 export type Role = InferSelectModel<typeof roles>;
@@ -44,21 +60,9 @@ export type NewExternalFile = InferInsertModel<typeof externalFiles>;
 export type AuditLog = InferSelectModel<typeof auditLogs>;
 export type NewAuditLog = InferInsertModel<typeof auditLogs>;
 
-// Form types for patient operations
-export type PatientForm = {
-  patientCode: string;
-  firstName: string;
-  lastName: string;
-  emergencyName?: string;
-  emergencyRelation?: string;
-  emergencyPhone?: string;
-  address?: string;
-  age?: number;
-  gender?: string;
-  heightCm?: number;
-  weightKg?: number;
-  shoeSize?: string;
-};
-
 // Utility types for table displays
-export type PatientField = Pick<Patient, 'id' | 'patientCode' | 'firstName' | 'lastName'>; 
+export type PatientField = Pick<
+  Patient,
+  "id" | "patientCode" | "firstName" | "lastName"
+>;
+export type HospitalField = Pick<Hospital, "id" | "hospitalCode" | "name">;

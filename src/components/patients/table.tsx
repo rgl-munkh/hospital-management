@@ -1,17 +1,14 @@
 "use client";
 
-import { DataTable } from "@/components/data-table";
+import { GenericTable } from "@/components/generic-table";
 import { columns } from "./columns";
 import { Patient } from "@/lib/definitions";
+import { patientTableConfig } from "@/lib/table-configs";
 
 interface PatientsTableProps {
   patients: Patient[];
 }
 
 export default function PatientsTable({ patients }: PatientsTableProps) {
-  return (
-    <div className="space-y-4">
-      <DataTable columns={columns} data={patients} />
-    </div>
-  );
+  return <GenericTable columns={columns} data={patients} config={patientTableConfig} />;
 }

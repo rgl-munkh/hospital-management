@@ -9,12 +9,27 @@ import { Input } from "@/components/ui/input";
 import { DataTableViewOptions } from "@/components/data-table-view-options";
 import { DataTableFacetedFilter } from "@/components/data-table-faceted-filter";
 
+interface FilterOption {
+  label: string;
+  value: string;
+}
+
+interface FilterConfig {
+  columnId: string;
+  title: string;
+  options: FilterOption[];
+}
+
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
+  searchPlaceholder?: string;
+  filters?: FilterConfig[];
 }
 
 export function DataTableToolbar<TData>({
   table,
+  searchPlaceholder = "Search...",
+  filters = [],
 }: DataTableToolbarProps<TData>) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -36,22 +51,24 @@ export function DataTableToolbar<TData>({
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center space-x-2">
         <Input
-          placeholder="Filter patients..."
+          placeholder={searchPlaceholder}
           defaultValue={searchParams.get("query")?.toString()}
           onChange={(event) => handleSearch(event.target.value)}
           className="h-8 w-[150px] lg:w-[250px]"
         />
-        {table.getColumn("gender") && (
-          <DataTableFacetedFilter
-            column={table.getColumn("gender")}
-            title="Gender"
-            options={[
-              { label: "Male", value: "Male" },
-              { label: "Female", value: "Female" },
-              { label: "Other", value: "Other" },
-            ]}
-          />
-        )}
+        {filters.map((filter) => {
+          const column = table.getColumn(filter.columnId);
+          if (!column) return null;
+          
+          return (
+            <DataTableFacetedFilter
+              key={filter.columnId}
+              column={column}
+              title={filter.title}
+              options={filter.options}
+            />
+          );
+        })}
         {isFiltered && (
           <Button
             variant="ghost"

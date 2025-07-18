@@ -46,6 +46,20 @@ export const patients = pgTable("patients", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// HOSPITALS
+export const hospitals = pgTable("hospitals", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  hospitalCode: text("hospital_code").notNull().unique(),
+  name: text("name").notNull(),
+  address: text("address"),
+  phone: text("phone"),
+  email: text("email"),
+  website: text("website"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // PRESCRIPTIONS
 export const prescriptions = pgTable("prescriptions", {
   id: uuid("id").primaryKey().defaultRandom(),

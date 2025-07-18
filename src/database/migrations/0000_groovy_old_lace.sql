@@ -29,6 +29,20 @@ CREATE TABLE "external_files" (
 	"updated_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
+CREATE TABLE "hospitals" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"hospital_code" text NOT NULL,
+	"name" text NOT NULL,
+	"address" text,
+	"phone" text,
+	"email" text,
+	"website" text,
+	"is_active" boolean DEFAULT true,
+	"created_at" timestamp DEFAULT now(),
+	"updated_at" timestamp DEFAULT now(),
+	CONSTRAINT "hospitals_hospital_code_unique" UNIQUE("hospital_code")
+);
+--> statement-breakpoint
 CREATE TABLE "media_files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"patient_id" uuid NOT NULL,

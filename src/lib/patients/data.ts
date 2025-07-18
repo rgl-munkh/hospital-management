@@ -1,4 +1,4 @@
-'use server'
+"use server";
 
 import { db } from "@/database/connection";
 import { sql } from "drizzle-orm";
@@ -31,18 +31,16 @@ export async function fetchFilteredPatients(
   console.log(query, currentPage);
 
   try {
-    const data = await db
-      .select()
-      .from(patients)
-      .where(
-        sql`${patients.patientCode} ILIKE ${`%${query}%`} OR
-            ${patients.firstName} ILIKE ${`%${query}%`} OR
-            ${patients.lastName} ILIKE ${`%${query}%`} OR
-            ${patients.emergencyPhone} ILIKE ${`%${query}%`}`
-      )
-      .orderBy(desc(patients.createdAt))
-      .limit(ITEMS_PER_PAGE)
-      .offset(offset);
+    const data = await db.select().from(patients);
+    // .where(
+    //   sql`${patients.patientCode} ILIKE ${`%${query}%`} OR
+    //       ${patients.firstName} ILIKE ${`%${query}%`} OR
+    //       ${patients.lastName} ILIKE ${`%${query}%`} OR
+    //       ${patients.emergencyPhone} ILIKE ${`%${query}%`}`
+    // )
+    // .orderBy(desc(patients.createdAt))
+    // .limit(ITEMS_PER_PAGE)
+    // .offset(offset);
 
     return data;
   } catch (error) {
@@ -86,8 +84,6 @@ export async function fetchPatientById(id: string) {
   }
 }
 
-
-
 export async function getPatientCount() {
   try {
     const data = await db
@@ -99,4 +95,4 @@ export async function getPatientCount() {
     console.error("Database Error:", error);
     throw new Error("Failed to fetch patient count.");
   }
-} 
+}
