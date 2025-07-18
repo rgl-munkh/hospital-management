@@ -26,6 +26,11 @@ function ThreeDProcessNav() {
       label: "Auto Correction",
       description: "Auto correct the 3D model",
     },
+    {
+      href: "landmark",
+      label: "Landmark",
+      description: "Landmark the 3D model",
+    },
   ];
   return (
     <nav
