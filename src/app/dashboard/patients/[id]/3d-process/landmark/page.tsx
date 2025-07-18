@@ -30,7 +30,7 @@ function Landmark({ position, id, onRemove }) {
       }}
     >
       <sphereGeometry args={[1, 16, 16]} />
-      <meshBasicMaterial color='red' transparent opacity={0.8} />
+      <meshBasicMaterial color="red" transparent opacity={0.8} />
     </mesh>
   );
 }
@@ -96,10 +96,10 @@ function Scene({
 
   return (
     <>
-      <GizmoHelper alignment='bottom-right'>
+      <GizmoHelper alignment="bottom-right">
         <GizmoViewport
-          axisColors={['red', 'green', 'blue']}
-          labelColor='black'
+          axisColors={["red", "green", "blue"]}
+          labelColor="black"
         />
       </GizmoHelper>
       <axesHelper args={[200]} />
@@ -144,7 +144,7 @@ export default function LandmarkModelViewer() {
   const patientId = params.id as string;
 
   const [landmarks, setLandmarks] = useState([]);
-  const [mode, setMode] = useState('add'); // 'add' or 'remove'
+  const [mode, setMode] = useState("add"); // 'add' or 'remove'
 
   const [geometry, setGeometry] = useState<THREE.BufferGeometry | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -161,13 +161,16 @@ export default function LandmarkModelViewer() {
       try {
         // First try to fetch auto-correction type files
         let scans = await fetchScansByTypeAndPatientId(
-          "auto-correction",
+          "corrected-mesh",
           patientId
         );
 
         // If no auto-correction files found, fall back to raw_file type
         if (!scans.length) {
-          scans = await fetchScansByTypeAndPatientId("raw_file", patientId);
+          scans = await fetchScansByTypeAndPatientId(
+            "original-mesh",
+            patientId
+          );
           if (!scans.length) {
             toast.error("No STL file found for this patient.");
             setLoading(false);
@@ -202,7 +205,7 @@ export default function LandmarkModelViewer() {
 
   const handleLandmarkAdd = useCallback(
     (position) => {
-      if (mode !== 'add') return;
+      if (mode !== "add") return;
 
       const newLandmark = {
         id: position.x + position.y + position.z,
@@ -234,22 +237,18 @@ export default function LandmarkModelViewer() {
     const data = {
       points: points,
       count: points.length,
-      format: 'grasshopper_points',
+      format: "grasshopper_points",
     };
 
     const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: 'application/json',
+      type: "application/json",
     });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'grasshopper_points.json';
+    a.download = "grasshopper_points.json";
     a.click();
     URL.revokeObjectURL(url);
-  };
-
-  const onAutoCorrection = () => {
-    toast.info("Auto correction is not implemented yet");
   };
 
   const onHandleRhinoCompute = () => {
@@ -257,21 +256,21 @@ export default function LandmarkModelViewer() {
   };
 
   return (
-    <div className='h-screen relative'>
+    <div className="h-screen relative">
       {/* Control Panel */}
-      <div className='absolute top-4 left-4 z-10 bg-white p-4 rounded-lg shadow-lg max-w-sm'>
-        <h2 className='text-lg font-semibold mb-3'>Landmark Controls</h2>
+      <div className="absolute top-4 left-4 z-10 bg-white p-4 rounded-lg shadow-lg max-w-sm">
+        <h2 className="text-lg font-semibold mb-3">Landmark Controls</h2>
 
         {/* Mode Selection */}
-        <div className='mb-3'>
-          <label className='block text-sm font-medium mb-2'>Mode:</label>
-          <div className='flex gap-2'>
+        <div className="mb-3">
+          <label className="block text-sm font-medium mb-2">Mode:</label>
+          <div className="flex gap-2">
             <button
-              onClick={() => setMode('add')}
+              onClick={() => setMode("add")}
               className={`px-3 py-1 rounded text-sm ${
-                mode === 'add'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-700'
+                mode === "add"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-700"
               }`}
             >
               Add Landmarks
@@ -280,18 +279,18 @@ export default function LandmarkModelViewer() {
         </div>
 
         {/* Landmark Count */}
-        <div className='mb-3'>
-          <span className='text-sm text-gray-600'>
+        <div className="mb-3">
+          <span className="text-sm text-gray-600">
             Landmarks: {landmarks.length}
           </span>
         </div>
 
         {/* Action Buttons */}
-        <div className='flex flex-col gap-2'>
+        <div className="flex flex-col gap-2">
           <button
             onClick={clearAllLandmarks}
             disabled={landmarks.length === 0}
-            className='px-3 py-2 bg-red-500 text-white rounded text-sm disabled:bg-gray-300 disabled:cursor-not-allowed'
+            className="px-3 py-2 bg-red-500 text-white rounded text-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             Clear All
           </button>
@@ -306,14 +305,14 @@ export default function LandmarkModelViewer() {
           <button
             onClick={onHandleRhinoCompute}
             disabled={landmarks.length === 0}
-            className='px-3 py-2 bg-green-500 text-white rounded text-sm disabled:bg-gray-300 disabled:cursor-not-allowed'
+            className="px-3 py-2 bg-green-500 text-white rounded text-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             Compute
           </button>
         </div>
 
         {/* Instructions */}
-        <div className='mt-4 p-2 bg-blue-50 rounded text-xs text-blue-800'>
+        <div className="mt-4 p-2 bg-blue-50 rounded text-xs text-blue-800">
           <strong>Instructions:</strong>
           <br />
           • Click on the 3D model to add landmarks
@@ -325,13 +324,13 @@ export default function LandmarkModelViewer() {
 
       {/* Landmark List */}
       {landmarks.length > 0 && (
-        <div className='absolute top-4 right-4 z-10 bg-white p-4 rounded-lg shadow-lg max-w-xs max-h-96 overflow-y-auto'>
-          <h3 className='text-md font-semibold mb-2'>Landmarks List</h3>
-          <div className='space-y-2'>
+        <div className="absolute top-4 right-4 z-10 bg-white p-4 rounded-lg shadow-lg max-w-xs max-h-96 overflow-y-auto">
+          <h3 className="text-md font-semibold mb-2">Landmarks List</h3>
+          <div className="space-y-2">
             {landmarks.map((landmark, index) => (
-              <div key={landmark.id} className='text-xs bg-gray-50 p-2 rounded'>
-                <div className='font-medium'>Landmark {index + 1}</div>
-                <div className='text-gray-600'>
+              <div key={landmark.id} className="text-xs bg-gray-50 p-2 rounded">
+                <div className="font-medium">Landmark {index + 1}</div>
+                <div className="text-gray-600">
                   X: {landmark.position[0].toFixed(2)}
                   <br />
                   Y: {landmark.position[1].toFixed(2)}
@@ -340,7 +339,7 @@ export default function LandmarkModelViewer() {
                 </div>
                 <button
                   onClick={() => handleLandmarkRemove(landmark.id)}
-                  className='mt-1 px-2 py-1 bg-red-400 text-white rounded text-xs'
+                  className="mt-1 px-2 py-1 bg-red-400 text-white rounded text-xs"
                 >
                   Remove
                 </button>

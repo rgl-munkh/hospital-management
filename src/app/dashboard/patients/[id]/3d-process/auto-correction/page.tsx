@@ -10,9 +10,19 @@ import { fetchScansByTypeAndPatientId } from "@/lib/scans/data";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { uploadToSupabaseStorage } from "@/lib/supabase-storage";
-import { createScan } from "@/lib/scans/actions";
-import { Upload, File, X } from "lucide-react";
+import {
+  uploadToSupabaseStorage,
+  deleteFromSupabaseStorage,
+} from "@/lib/supabase-storage";
+import { createScan, updateScan } from "@/lib/scans/actions";
+import {
+  Upload,
+  File,
+  X,
+  AlertTriangle,
+  Loader2,
+  CheckCircle,
+} from "lucide-react";
 
 // Constants
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
@@ -20,13 +30,14 @@ const ALLOWED_FILE_TYPES = [".stl"];
 
 interface STLMeshProps {
   geometry: THREE.BufferGeometry | null;
+  color?: string;
 }
 
-function STLMesh({ geometry }: STLMeshProps) {
+function STLMesh({ geometry, color = "#4f46e5" }: STLMeshProps) {
   if (!geometry) return null;
   return (
     <mesh geometry={geometry}>
-      <meshStandardMaterial color="#4f46e5" />
+      <meshStandardMaterial color={color} />
     </mesh>
   );
 }
@@ -36,10 +47,19 @@ export default function AutoCorrectionModelViewer() {
   const patientId = params.id as string;
 
   const [geometry, setGeometry] = useState<THREE.BufferGeometry | null>(null);
+  const [correctedGeometry, setCorrectedGeometry] =
+    useState<THREE.BufferGeometry | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isAutoCorrecting, setIsAutoCorrecting] = useState<boolean>(false);
   const [fileName, setFileName] = useState<string>("");
+  const [existingAutoCorrection, setExistingAutoCorrection] =
+    useState<boolean>(false);
+  const [autoCorrectionCompleted, setAutoCorrectionCompleted] =
+    useState<boolean>(false);
+  const [correctedBlob, setCorrectedBlob] = useState<Blob | null>(null);
+  const [isSavingToStorage, setIsSavingToStorage] = useState<boolean>(false);
 
   const validateAndLoadFile = useCallback((file: File): boolean => {
     // Check file extension
@@ -98,13 +118,36 @@ export default function AutoCorrectionModelViewer() {
       try {
         // First try to fetch auto-correction type files
         let scans = await fetchScansByTypeAndPatientId(
-          "auto-correction",
+          "corrected-mesh",
           patientId
         );
 
+        // Check if auto-correction files exist
+        if (scans.length > 0) {
+          setExistingAutoCorrection(true);
+          // Load the corrected-mesh file for display
+          const response = await fetch(scans[0].fileUrl);
+          if (!response.ok) {
+            toast.error("Failed to fetch corrected-mesh file.");
+            setLoading(false);
+            return;
+          }
+
+          const blob = await response.blob();
+          const arrayBuffer = await blob.arrayBuffer();
+          const loader = new STLLoader();
+          const geo = loader.parse(arrayBuffer);
+          setGeometry(geo as THREE.BufferGeometry);
+          setLoading(false);
+          return;
+        }
+
         // If no auto-correction files found, fall back to raw_file type
         if (!scans.length) {
-          scans = await fetchScansByTypeAndPatientId("raw_file", patientId);
+          scans = await fetchScansByTypeAndPatientId(
+            "original-mesh",
+            patientId
+          );
           if (!scans.length) {
             setLoading(false);
             return; // Don't show error, just no files available
@@ -173,7 +216,30 @@ export default function AutoCorrectionModelViewer() {
 
     setIsSubmitting(true);
     try {
-      const filePath = `${patientId}/auto-correction/${selectedFile.name}`;
+      const filePath = `${patientId}/corrected-mesh.stl`;
+
+      // Check if auto-correction files already exist
+      const existingScans = await fetchScansByTypeAndPatientId(
+        "auto-correction",
+        patientId
+      );
+
+      if (existingScans.length > 0) {
+        // Delete old file from storage
+        const oldFilePath = existingScans[0].fileUrl
+          .split("/")
+          .slice(-2)
+          .join("/"); // Extract path from URL
+        const deleteResult = await deleteFromSupabaseStorage(
+          "patient-media",
+          oldFilePath
+        );
+
+        if (deleteResult.error) {
+          console.warn("Failed to delete old file:", deleteResult.error);
+          // Continue with upload even if delete fails
+        }
+      }
 
       const response = await uploadToSupabaseStorage(
         "patient-media",
@@ -187,13 +253,22 @@ export default function AutoCorrectionModelViewer() {
         return;
       }
 
-      await createScan({
-        patientId,
-        type: "auto-correction",
-        fileUrl: response.publicUrl,
-      });
+      if (existingScans.length > 0) {
+        // Update existing scan record
+        await updateScan(patientId, "auto-correction", response.publicUrl);
+        toast.success("Auto-correction STL file updated successfully!");
+      } else {
+        // Create new scan record
+        await createScan({
+          patientId,
+          type: "auto-correction",
+          fileUrl: response.publicUrl,
+        });
+        toast.success("Auto-correction STL file uploaded successfully!");
+      }
 
-      toast.success("Auto-correction STL file uploaded successfully!");
+      // Update state to reflect that auto-correction files now exist
+      setExistingAutoCorrection(true);
 
       // Clear the form
       setSelectedFile(null);
@@ -211,10 +286,148 @@ export default function AutoCorrectionModelViewer() {
     setSelectedFile(null);
     setFileName("");
     setGeometry(null);
+    setCorrectedGeometry(null);
+    setCorrectedBlob(null);
+    setAutoCorrectionCompleted(false);
   };
 
-  const handleAutoCorrection = () => {
-    toast.info("Auto correction feature is coming soon!");
+  const handleSaveToStorage = async () => {
+    if (!correctedBlob) {
+      toast.error("No corrected file available to save.");
+      return;
+    }
+
+    setIsSavingToStorage(true);
+    try {
+      // Save the corrected file to storage
+      const correctedFile = Object.assign(correctedBlob, {
+        name: "corrected-mesh.stl",
+      }) as File;
+
+      const filePath = `${patientId}/corrected-mesh.stl`;
+      const uploadResponse = await uploadToSupabaseStorage(
+        "patient-media",
+        correctedFile,
+        filePath,
+        correctedFile.type
+      );
+
+      if (uploadResponse.error) {
+        throw new Error(uploadResponse.error);
+      }
+
+      // Create or update scan record for corrected file
+      const existingCorrectedScans = await fetchScansByTypeAndPatientId(
+        "corrected-mesh",
+        patientId
+      );
+      if (existingCorrectedScans.length > 0) {
+        await updateScan(patientId, "corrected-mesh", uploadResponse.publicUrl);
+      } else {
+        await createScan({
+          patientId,
+          type: "corrected-mesh",
+          fileUrl: uploadResponse.publicUrl,
+        });
+      }
+
+      setExistingAutoCorrection(true);
+      toast.success("Corrected model saved to storage successfully!");
+    } catch (error) {
+      console.error("Save to storage error:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to save corrected model to storage"
+      );
+    } finally {
+      setIsSavingToStorage(false);
+    }
+  };
+
+  const handleAutoCorrection = async () => {
+    if (!geometry) {
+      toast.error("No STL model available for auto-correction.");
+      return;
+    }
+
+    setIsAutoCorrecting(true);
+    setAutoCorrectionCompleted(false);
+
+    try {
+      // Get the current STL file from storage or use the selected file
+      let stlFile: File;
+
+      if (selectedFile) {
+        stlFile = selectedFile;
+      } else {
+        // Fetch the existing STL file from storage
+        const scans = await fetchScansByTypeAndPatientId(
+          "corrected-mesh",
+          patientId
+        );
+        if (scans.length === 0) {
+          const rawScans = await fetchScansByTypeAndPatientId(
+            "original-mesh",
+            patientId
+          );
+          if (rawScans.length === 0) {
+            toast.error("No STL file found for auto-correction.");
+            return;
+          }
+          const response = await fetch(rawScans[0].fileUrl);
+          const blob = await response.blob();
+          stlFile = Object.assign(blob, { name: "model.stl" }) as File;
+        } else {
+          const response = await fetch(scans[0].fileUrl);
+          const blob = await response.blob();
+          stlFile = Object.assign(blob, { name: "model.stl" }) as File;
+        }
+      }
+
+      // Create form data
+      const formData = new FormData();
+      formData.append("file", stlFile);
+
+      // Make POST request to auto-correction endpoint
+      const endpoint = process.env.AUTO_CORRECTION_ENDPOINT + "/fix-mesh";
+      if (!endpoint) {
+        toast.error("Auto-correction endpoint not configured.");
+        return;
+      }
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Auto-correction failed: ${response.statusText}`);
+      }
+
+      // Get the corrected STL file as blob
+      const correctedBlob = await response.blob();
+
+      // Parse the corrected STL file
+      const arrayBuffer = await correctedBlob.arrayBuffer();
+      const loader = new STLLoader();
+      const correctedGeo = loader.parse(arrayBuffer);
+
+      setCorrectedGeometry(correctedGeo as THREE.BufferGeometry);
+      setCorrectedBlob(correctedBlob);
+      setAutoCorrectionCompleted(true);
+
+      toast.success(
+        "Auto-correction completed successfully! Click 'Save to Storage' to save the corrected model."
+      );
+    } catch (error) {
+      console.error("Auto-correction error:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Auto-correction failed"
+      );
+    } finally {
+      setIsAutoCorrecting(false);
+    }
   };
 
   return (
@@ -224,6 +437,16 @@ export default function AutoCorrectionModelViewer() {
       {/* Upload Section */}
       <div className="mb-6 p-4 border rounded-lg bg-gray-50">
         <h2 className="text-lg font-semibold mb-4">Upload STL Model</h2>
+
+        {existingAutoCorrection && (
+          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-yellow-600" />
+            <span className="text-sm text-yellow-800">
+              An auto-correction file already exists. Uploading a new file will
+              override the existing one.
+            </span>
+          </div>
+        )}
 
         <div className="flex items-center gap-4 mb-4">
           <div className="flex-1">
@@ -258,40 +481,99 @@ export default function AutoCorrectionModelViewer() {
             className="flex items-center gap-2"
           >
             <Upload className="h-4 w-4" />
-            {isSubmitting ? "Uploading..." : "Upload STL"}
+            {isSubmitting
+              ? "Uploading..."
+              : existingAutoCorrection
+              ? "Update STL"
+              : "Upload STL"}
           </Button>
 
           <Button
             variant="outline"
             onClick={handleAutoCorrection}
-            disabled={!geometry}
+            disabled={!geometry || isAutoCorrecting}
+            className="flex items-center gap-2"
           >
-            Run Auto-Correction
+            {isAutoCorrecting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                {autoCorrectionCompleted && (
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                )}
+                Run Auto-Correction
+              </>
+            )}
           </Button>
+
+          {autoCorrectionCompleted && correctedBlob && (
+            <Button
+              variant="default"
+              onClick={handleSaveToStorage}
+              disabled={isSavingToStorage}
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+            >
+              {isSavingToStorage ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4" />
+                  Save to Storage
+                </>
+              )}
+            </Button>
+          )}
         </div>
       </div>
 
       {/* 3D Viewer */}
-      <div className="w-full h-[calc(100vh-320px)] border border-gray-300 rounded-lg overflow-hidden">
+      <div className="w-full h-[calc(100vh-320px)] border border-gray-300 rounded-lg overflow-hidden relative">
         {loading ? (
           <div className="flex items-center justify-center h-full text-lg text-gray-500">
             Loading STL model...
           </div>
         ) : geometry ? (
-          <Canvas camera={{ position: [50, 50, 100], fov: 60 }}>
-            <ambientLight />
-            <pointLight position={[10, 10, 10]} />
-            <OrbitControls />
-            <STLMesh geometry={geometry} />
-            <axesHelper args={[200]} />
-            <gridHelper args={[1000, 100]} />
-            <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
-              <GizmoViewport
-                axisColors={["#ff2060", "#20df80", "#2080ff"]}
-                labelColor="black"
-              />
-            </GizmoHelper>
-          </Canvas>
+          <>
+            <Canvas camera={{ position: [50, 50, 100], fov: 60 }}>
+              <ambientLight />
+              <pointLight position={[10, 10, 10]} />
+              <OrbitControls />
+              <STLMesh geometry={geometry} color="#4f46e5" />
+              {correctedGeometry && (
+                <STLMesh geometry={correctedGeometry} color="#10b981" />
+              )}
+              <axesHelper args={[200]} />
+              <gridHelper args={[1000, 100]} />
+              <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
+                <GizmoViewport
+                  axisColors={["#ff2060", "#20df80", "#2080ff"]}
+                  labelColor="black"
+                />
+              </GizmoHelper>
+            </Canvas>
+
+            {/* Legend */}
+            <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg">
+              <div className="flex flex-col gap-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-[#4f46e5]"></div>
+                  <span>Original Model</span>
+                </div>
+                {correctedGeometry && (
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-[#10b981]"></div>
+                    <span>Corrected Model</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
         ) : (
           <div className="flex items-center justify-center h-full text-lg text-gray-500">
             No STL model available. Please upload a file to view the 3D model.

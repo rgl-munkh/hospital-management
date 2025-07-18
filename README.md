@@ -73,6 +73,7 @@ The system includes comprehensive data models:
    POOLED_DATABASE_URL=your_pooled_postgres_connection_string
    SUPABASE_URL=your_supabase_url
    SUPABASE_ANON_KEY=your_supabase_anon_key
+   NEXT_PUBLIC_AUTO_CORRECTION_ENDPOINT=your_auto_correction_api_endpoint
    ```
 
 4. **Database Setup**

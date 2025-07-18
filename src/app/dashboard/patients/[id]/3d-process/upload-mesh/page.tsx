@@ -33,7 +33,10 @@ const UploadMeshPage = () => {
   useEffect(() => {
     const fetchScans = async () => {
       try {
-        const scans = await fetchScansByTypeAndPatientId("raw_file", patientId);
+        const scans = await fetchScansByTypeAndPatientId(
+          "original-mesh",
+          patientId
+        );
         if (scans.length === 0) {
           return;
         }
@@ -114,7 +117,7 @@ const UploadMeshPage = () => {
       }
       setIsSubmitting(true);
 
-      const filePath = `${patientId}/${file.name}`;
+      const filePath = `${patientId}/original-mesh`;
 
       const response = await uploadToSupabaseStorage(
         "patient-media",
@@ -131,7 +134,7 @@ const UploadMeshPage = () => {
 
       await createScan({
         patientId,
-        type: "raw_file",
+        type: "original-mesh",
         fileUrl: response.publicUrl,
       });
 

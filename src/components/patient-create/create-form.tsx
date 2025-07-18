@@ -2,11 +2,12 @@
 
 import { useActionState } from "react";
 import { Loader2, Save } from "lucide-react";
-import { createPatient, CreatePatientState } from "@/lib/patients/actions";
+import { createPatient } from "@/lib/patients/actions";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/form-error-message";
+import { CreatePatientState } from "@/lib/patients";
 
 const initialState: CreatePatientState = {
   message: "",

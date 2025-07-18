@@ -31,6 +31,11 @@ function ThreeDProcessNav() {
       label: "Landmark",
       description: "Landmark the 3D model",
     },
+    {
+      href: "auto-modeling",
+      label: "Auto Modeling",
+      description: "Auto model the 3D model",
+    },
   ];
   return (
     <nav
@@ -48,7 +53,7 @@ function ThreeDProcessNav() {
         {navItems.map((item) => {
           const isActive = pathname.endsWith(item.href);
           return (
-            <li key={item.href} role="listitem">
+            <li key={item.href}>
               <Link
                 href={item.href}
                 className={cn(

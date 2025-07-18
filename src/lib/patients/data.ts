@@ -31,16 +31,18 @@ export async function fetchFilteredPatients(
   console.log(query, currentPage);
 
   try {
-    const data = await db.select().from(patients);
-    // .where(
-    //   sql`${patients.patientCode} ILIKE ${`%${query}%`} OR
-    //       ${patients.firstName} ILIKE ${`%${query}%`} OR
-    //       ${patients.lastName} ILIKE ${`%${query}%`} OR
-    //       ${patients.emergencyPhone} ILIKE ${`%${query}%`}`
-    // )
-    // .orderBy(desc(patients.createdAt))
-    // .limit(ITEMS_PER_PAGE)
-    // .offset(offset);
+    const data = await db
+      .select()
+      .from(patients)
+      .where(
+        sql`${patients.patientCode} ILIKE ${`%${query}%`} OR
+          ${patients.firstName} ILIKE ${`%${query}%`} OR
+          ${patients.lastName} ILIKE ${`%${query}%`} OR
+          ${patients.emergencyPhone} ILIKE ${`%${query}%`}`
+      )
+      .orderBy(desc(patients.createdAt))
+      .limit(ITEMS_PER_PAGE)
+      .offset(offset);
 
     return data;
   } catch (error) {
