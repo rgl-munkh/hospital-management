@@ -30,7 +30,7 @@ const navigation = [
   },
   {
     name: "Hospital",
-    href: "/dashboard/hospital",
+    href: "/dashboard/hospitals",
     icon: Building2,
   },
   {
@@ -63,16 +63,16 @@ export function DashboardSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {navigation.map((item) => {
-                const isActive = pathname.startsWith(item.href);
+                const isActive = pathname.endsWith(item.href);
                 return (
                   <SidebarMenuItem key={item.name}>
                     <SidebarMenuButton asChild isActive={isActive}>
-                                              <Link href={item.href}>
-                          <item.icon className="h-4 w-4" />
-                          <span className="truncate font-semibold">
-                            {item.name}
-                          </span>
-                        </Link>
+                      <Link href={item.href}>
+                        <item.icon className="h-4 w-4" />
+                        <span className="truncate font-semibold">
+                          {item.name}
+                        </span>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );

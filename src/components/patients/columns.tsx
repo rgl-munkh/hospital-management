@@ -3,9 +3,9 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Scan } from "lucide-react";
+import { ChevronRight, FileAxis3d } from "lucide-react";
 import Link from "next/link";
-import { Patient } from "@/lib/definitions";
+import { Patient } from "@/lib/definitions";  
 import { DeleteDialog } from "./delete-dialog";
 
 export const columns: ColumnDef<Patient>[] = [
@@ -73,7 +73,7 @@ export const columns: ColumnDef<Patient>[] = [
             <Link
               href={`/dashboard/patients/${patient.id}/3d-process/upload-mesh`}
             >
-              <Scan className="h-4 w-4" />
+              <FileAxis3d className="h-4 w-4" />
             </Link>
           </Button>
           <Button variant="outline" size="sm" asChild>
