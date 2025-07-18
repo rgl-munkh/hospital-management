@@ -11,6 +11,7 @@ interface NavItem {
   href: string;
   label: string;
   description?: string;
+  disabled?: boolean;
 }
 // TODO: move this to a separate component
 function ThreeDProcessNav() {
@@ -30,6 +31,12 @@ function ThreeDProcessNav() {
       href: "landmark",
       label: "Landmark",
       description: "Landmark the 3D model",
+    },
+    {
+      href: "anatomy-fixing",
+      label: "Anatomy Fixing",
+      description: "Anatomical fixing the 3D model",
+      disabled: true,
     },
     {
       href: "auto-modeling",
@@ -56,12 +63,14 @@ function ThreeDProcessNav() {
             <li key={item.href}>
               <Link
                 href={item.href}
+                aria-disabled={item.disabled}
                 className={cn(
                   "block px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200",
                   "hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
                   isActive
                     ? "bg-blue-50 text-blue-700 border-l-2 border-blue-500"
-                    : "text-gray-700 hover:text-gray-900"
+                    : "text-gray-700 hover:text-gray-900",
+                  item.disabled && "pointer-events-none opacity-50"
                 )}
                 aria-current={isActive ? "page" : undefined}
                 title={item.description}
