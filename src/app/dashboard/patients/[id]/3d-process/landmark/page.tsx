@@ -111,7 +111,7 @@ function Scene({
         onLandmarkAdd(point);
       }
     },
-    [camera, raycaster, onLandmarkAdd]
+    [camera, raycaster, onLandmarkAdd, isDragging, meshRef]
   );
 
   return (

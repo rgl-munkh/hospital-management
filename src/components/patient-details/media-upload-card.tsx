@@ -256,11 +256,12 @@ export function MediaUploadCard({ patientId }: MediaUploadCardProps) {
   // Cleanup preview URLs on unmount
   useEffect(() => {
     return () => {
+      // Cleanup object URLs on unmount
       mediaFiles.forEach((media) => {
         URL.revokeObjectURL(media.preview);
       });
     };
-  }, []); // Remove mediaFiles dependency as it's not needed for cleanup
+  }, [mediaFiles]); // Add mediaFiles dependency
 
   const createMediaFile = (file: File): MediaFile => {
     const preview = URL.createObjectURL(file);

@@ -7,13 +7,14 @@ import { HospitalsTableSkeleton } from "@/components/skeletons";
 export default async function HospitalsPage({
   searchParams,
 }: {
-  searchParams?: {
+  searchParams?: Promise<{
     query?: string;
     page?: string;
-  };
+  }>;
 }) {
-  const query = searchParams?.query || "";
-  const currentPage = Number(searchParams?.page) || 1;
+  const params = await searchParams;
+  const query = params?.query || "";
+  const currentPage = Number(params?.page) || 1;
 
   const hospitals = await fetchFilteredHospitals(query, currentPage);
 
