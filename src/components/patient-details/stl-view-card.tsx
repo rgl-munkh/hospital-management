@@ -29,39 +29,57 @@ export function StlViewCard() {
     };
     reader.readAsArrayBuffer(file);
   };
+  
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="w-full justify-between flex items-center gap-2">
-          <div className="flex items-center">
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
             <Box className="h-5 w-5" />
-            <p>3D Model Information</p>
+            <span>3D Model Information</span>
           </div>
-          <div>
-            <Button
-              onClick={() => fileInputRef.current?.click()}
-              variant="outline"
-            >
-              Upload STL Model
-            </Button>
-            <Input
-              className="hidden"
-              ref={fileInputRef}
-              type="file"
-              accept=".stl"
-              onChange={onFileInputChange}
-            />
-          </div>
+          <Button
+            onClick={() => fileInputRef.current?.click()}
+            variant="outline"
+            size="sm"
+          >
+            Upload STL Model
+          </Button>
         </CardTitle>
+        <Input
+          className="hidden"
+          ref={fileInputRef}
+          type="file"
+          accept=".stl"
+          onChange={onFileInputChange}
+        />
       </CardHeader>
-      <CardContent className="w-full h-[calc(100vh-360px)]">
+      <CardContent className="p-0">
+        <div className="w-full h-[calc(100vh-360px)] border-t">
         <Canvas camera={{ position: [50, 50, 100], fov: 60 }}>
-          <ambientLight />
-          <pointLight position={[10, 10, 10]} />
+          {/* Studio lighting setup */}
+          <ambientLight intensity={0.4} />
+          <directionalLight 
+            position={[50, 50, 50]} 
+            intensity={0.8} 
+            castShadow 
+            shadow-mapSize-width={2048}
+            shadow-mapSize-height={2048}
+          />
+          <directionalLight 
+            position={[-50, -50, -50]} 
+            intensity={0.3} 
+            color="#ffffff"
+          />
+          <pointLight 
+            position={[0, 100, 0]} 
+            intensity={0.5} 
+            color="#ffffff"
+          />
           <OrbitControls />
           {geometry && (
             <mesh geometry={geometry}>
-              <meshStandardMaterial color="#4f46e5" />
+              <meshStandardMaterial color="#D3D2D0" />
             </mesh>
           )}
           <axesHelper args={[200]} />
@@ -73,6 +91,7 @@ export function StlViewCard() {
             />
           </GizmoHelper>
         </Canvas>
+        </div>
       </CardContent>
     </Card>
   );

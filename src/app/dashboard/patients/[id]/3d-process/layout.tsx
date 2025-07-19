@@ -42,6 +42,7 @@ function ThreeDProcessNav() {
       href: "auto-modeling",
       label: "Auto Modeling",
       description: "Auto model the 3D model",
+      disabled: true,
     },
   ];
   return (

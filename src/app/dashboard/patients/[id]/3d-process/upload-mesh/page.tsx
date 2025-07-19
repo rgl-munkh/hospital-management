@@ -17,7 +17,7 @@ function STLMesh({ geometry }: { geometry: THREE.BufferGeometry | null }) {
   if (!geometry) return null;
   return (
     <mesh geometry={geometry}>
-      <meshStandardMaterial color="#4f46e5" />
+      <meshStandardMaterial color="#D3D2D0" />
     </mesh>
   );
 }
@@ -45,7 +45,6 @@ const UploadMeshPage = () => {
         const response = await fetch(scans[0].fileUrl);
         if (!response.ok) {
           console.error("Failed to fetch STL file:", response.statusText);
-
           return;
         }
 
@@ -150,22 +149,46 @@ const UploadMeshPage = () => {
   };
 
   return (
-    <div className="p-10">
-      <h1 className="text-2xl font-bold mb-6">Upload STL file</h1>
-
-      <div className="mb-4 flex gap-4">
-        <Input
-          type="file"
-          onChange={onFileInputChange}
-          accept=".stl"
-          className="border rounded px-2 py-1 w-48"
-        />
+    <div className="space-y-6 p-6">
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold">Upload STL File</h1>
+        <p className="text-muted-foreground">
+          Upload and visualize 3D STL models for patient analysis
+        </p>
       </div>
 
-      <div className="w-full h-[calc(100vh-240px)] border border-gray-300 rounded mt-4">
+      <div className="space-y-4">
+        <div className="flex items-center gap-4">
+          <Input
+            type="file"
+            onChange={onFileInputChange}
+            accept=".stl"
+            className="max-w-sm"
+          />
+        </div>
+      </div>
+
+      <div className="w-full h-[calc(100vh-280px)] border border-border rounded-lg overflow-hidden bg-background">
         <Canvas camera={{ position: [50, 50, 100], fov: 60 }}>
-          <ambientLight />
-          <pointLight position={[10, 10, 10]} />
+          {/* Studio lighting setup */}
+          <ambientLight intensity={0.4} />
+          <directionalLight 
+            position={[50, 50, 50]} 
+            intensity={0.8} 
+            castShadow 
+            shadow-mapSize-width={2048}
+            shadow-mapSize-height={2048}
+          />
+          <directionalLight 
+            position={[-50, -50, -50]} 
+            intensity={0.3} 
+            color="#ffffff"
+          />
+          <pointLight 
+            position={[0, 100, 0]} 
+            intensity={0.5} 
+            color="#ffffff"
+          />
           <OrbitControls />
           {geometry && <STLMesh geometry={geometry} />}
           <axesHelper args={[200]} />
@@ -179,11 +202,10 @@ const UploadMeshPage = () => {
         </Canvas>
       </div>
 
-      <div className="flex justify-end mt-4">
+      <div className="flex justify-end">
         <Button
           type="button"
           onClick={submitPatient}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 "
           disabled={isSubmitting}
         >
           {isSubmitting ? "Saving..." : "Save STL & Patient"}

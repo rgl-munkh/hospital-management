@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -13,7 +14,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Users, Building2, Stethoscope, Home } from "lucide-react";
 
@@ -22,21 +22,25 @@ const navigation = [
     name: "Dashboard",
     href: "/dashboard",
     icon: Home,
+    description: "Overview and key metrics",
   },
   {
     name: "Patients",
     href: "/dashboard/patients",
     icon: Users,
+    description: "Manage patient records",
   },
   {
-    name: "Hospital",
+    name: "Hospitals",
     href: "/dashboard/hospitals",
     icon: Building2,
+    description: "Hospital and department management",
   },
   {
     name: "Diagnoses",
     href: "/dashboard/diagnoses",
     icon: Stethoscope,
+    description: "Medical diagnoses and treatments",
   },
 ];
 
@@ -46,15 +50,15 @@ export function DashboardSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="border-b border-border p-4">
-        <SidebarTrigger className="-me-1" />
         <div className="flex items-center gap-2 px-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded-lg border bg-background font-bold shadow-sm">
-            H
-          </div>
-          <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-semibold">Hospital</span>
-            <span className="truncate text-xs">Management</span>
-          </div>
+          <Image
+            priority
+            src="/logo.png"
+            alt="Hospital Management System Logo"
+            width={120}
+            height={120}
+            className="h-8 w-auto"
+          />
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -63,12 +67,19 @@ export function DashboardSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {navigation.map((item) => {
-                const isActive = pathname.endsWith(item.href);
+                const isActive =
+                  pathname === item.href ||
+                  pathname.startsWith(item.href + "/");
                 return (
                   <SidebarMenuItem key={item.name}>
-                    <SidebarMenuButton asChild isActive={isActive}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      aria-label={`Navigate to ${item.name} - ${item.description}`}
+                      title={item.description}
+                    >
                       <Link href={item.href}>
-                        <item.icon className="h-4 w-4" />
+                        <item.icon className="h-4 w-4" aria-hidden="true" />
                         <span className="truncate font-semibold">
                           {item.name}
                         </span>
@@ -83,7 +94,10 @@ export function DashboardSidebar() {
       </SidebarContent>
       <SidebarFooter className="border-t border-border p-4">
         <div className="flex items-center gap-2 px-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg border bg-background font-bold shadow-sm">
+          <div
+            className="flex h-8 w-8 items-center justify-center rounded-lg border bg-background font-bold shadow-sm"
+            aria-label="System status indicator"
+          >
             H
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">

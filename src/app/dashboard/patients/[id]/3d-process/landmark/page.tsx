@@ -1,6 +1,6 @@
 "use client";
 
-import { Canvas, useThree } from "@react-three/fiber";
+import { Canvas, useThree, ThreeEvent } from "@react-three/fiber";
 import { OrbitControls, GizmoHelper, GizmoViewport } from "@react-three/drei";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
@@ -14,13 +14,33 @@ function STLMesh({ geometry }: { geometry: THREE.BufferGeometry | null }) {
   if (!geometry) return null;
   return (
     <mesh geometry={geometry}>
-      <meshStandardMaterial color="#4f46e5" />
+      <meshStandardMaterial color="#D3D2D0" />
     </mesh>
   );
 }
 
+interface LandmarkProps {
+  position: [number, number, number];
+  id: string;
+  onRemove: (id: string) => void;
+}
+
+interface Landmark {
+  id: string;
+  position: [number, number, number];
+  coordinates: THREE.Vector3;
+}
+
+interface SceneProps {
+  geometry: THREE.BufferGeometry | null;
+  onLandmarkAdd: (position: THREE.Vector3) => void;
+  landmarks: Landmark[];
+  onLandmarkRemove: (id: string) => void;
+  meshRef: React.RefObject<THREE.Mesh | null>;
+}
+
 // Landmark component to render individual landmarks
-function Landmark({ position, id, onRemove }) {
+function Landmark({ position, id, onRemove }: LandmarkProps) {
   return (
     <mesh
       position={position}
@@ -42,20 +62,20 @@ function Scene({
   landmarks,
   onLandmarkRemove,
   meshRef,
-}) {
+}: SceneProps) {
   const { camera, raycaster } = useThree();
   // const meshRef = useRef();
   //avoid adding landmark when moving around the object
   const [isDragging, setIsDragging] = useState(false);
   const mouseDownPos = useRef({ x: 0, y: 0 });
 
-  const handlePointerDown = (event) => {
+  const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
     mouseDownPos.current = { x: event.pointer.x, y: event.pointer.y };
     setIsDragging(false);
   };
 
   const handleClick = useCallback(
-    (event) => {
+    (event: ThreeEvent<PointerEvent>) => {
       //If click is not on the mesh or user is rotating mesh don't add landmark
       if (!meshRef.current || isDragging) return;
 
@@ -104,15 +124,25 @@ function Scene({
       </GizmoHelper>
       <axesHelper args={[200]} />
       <gridHelper args={[1000, 100]} />
-      <ambientLight intensity={Math.PI / 2} />
-      <spotLight
-        position={[10, 10, 10]}
-        angle={0.15}
-        penumbra={1}
-        decay={0}
-        intensity={Math.PI}
+      {/* Studio lighting setup */}
+      <ambientLight intensity={0.4} />
+      <directionalLight 
+        position={[50, 50, 50]} 
+        intensity={0.8} 
+        castShadow 
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
       />
-      <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
+      <directionalLight 
+        position={[-50, -50, -50]} 
+        intensity={0.3} 
+        color="#ffffff"
+      />
+      <pointLight 
+        position={[0, 100, 0]} 
+        intensity={0.5} 
+        color="#ffffff"
+      />
 
       <group
         ref={meshRef}
@@ -143,21 +173,15 @@ export default function LandmarkModelViewer() {
   const params = useParams();
   const patientId = params.id as string;
 
-  const [landmarks, setLandmarks] = useState([]);
+  const [landmarks, setLandmarks] = useState<Landmark[]>([]);
   const [mode, setMode] = useState("add"); // 'add' or 'remove'
 
   const [geometry, setGeometry] = useState<THREE.BufferGeometry | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
 
   const meshRef = useRef<THREE.Mesh>(null);
 
-  // Handle local file upload
-  // Ref for the hidden file input
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   useEffect(() => {
     const fetchSTL = async () => {
-      setLoading(true);
       try {
         // First try to fetch auto-correction type files
         let scans = await fetchScansByTypeAndPatientId(
@@ -173,7 +197,6 @@ export default function LandmarkModelViewer() {
           );
           if (!scans.length) {
             toast.error("No STL file found for this patient.");
-            setLoading(false);
             return;
           }
         }
@@ -181,13 +204,11 @@ export default function LandmarkModelViewer() {
         const response = await fetch(scans[0].fileUrl);
         if (!response.ok) {
           toast.error("Failed to fetch STL file.");
-          setLoading(false);
           return;
         }
         const arrayBuffer = await response.arrayBuffer();
         if (arrayBuffer.byteLength > 100 * 1024 * 1024) {
           toast.error("STL file is too large to load.");
-          setLoading(false);
           return;
         }
         const loader = new STLLoader();
@@ -196,19 +217,17 @@ export default function LandmarkModelViewer() {
       } catch (error) {
         console.error("Error loading STL file:", error);
         toast.error("Error loading STL file.");
-      } finally {
-        setLoading(false);
       }
     };
     fetchSTL();
   }, [patientId]);
 
   const handleLandmarkAdd = useCallback(
-    (position) => {
+    (position: THREE.Vector3) => {
       if (mode !== "add") return;
 
-      const newLandmark = {
-        id: position.x + position.y + position.z,
+      const newLandmark: Landmark = {
+        id: String(position.x + position.y + position.z),
         position: [position.x, position.y, position.z],
         coordinates: position,
       };
@@ -218,7 +237,7 @@ export default function LandmarkModelViewer() {
     [mode]
   );
 
-  const handleLandmarkRemove = useCallback((id) => {
+  const handleLandmarkRemove = useCallback((id: string) => {
     setLandmarks((prev) => prev.filter((landmark) => landmark.id !== id));
   }, []);
 
@@ -258,93 +277,113 @@ export default function LandmarkModelViewer() {
   return (
     <div className="h-screen relative">
       {/* Control Panel */}
-      <div className="absolute top-4 left-4 z-10 bg-white p-4 rounded-lg shadow-lg max-w-sm">
-        <h2 className="text-lg font-semibold mb-3">Landmark Controls</h2>
-
-        {/* Mode Selection */}
-        <div className="mb-3">
-          <label className="block text-sm font-medium mb-2">Mode:</label>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setMode("add")}
-              className={`px-3 py-1 rounded text-sm ${
-                mode === "add"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-700"
-              }`}
-            >
-              Add Landmarks
-            </button>
+      <div className="absolute top-6 left-6 z-10 bg-background p-6 rounded-lg shadow-lg border max-w-sm">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold">Landmark Controls</h2>
+            <p className="text-sm text-muted-foreground">
+              Add and manage landmarks on the 3D model
+            </p>
           </div>
-        </div>
 
-        {/* Landmark Count */}
-        <div className="mb-3">
-          <span className="text-sm text-gray-600">
-            Landmarks: {landmarks.length}
-          </span>
-        </div>
+          {/* Mode Selection */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Mode:</label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setMode("add")}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  mode === "add"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                }`}
+              >
+                Add Landmarks
+              </button>
+            </div>
+          </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col gap-2">
-          <button
-            onClick={clearAllLandmarks}
-            disabled={landmarks.length === 0}
-            className="px-3 py-2 bg-red-500 text-white rounded text-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
-          >
-            Clear All
-          </button>
-          <button
-            onClick={exportLandmarksGrassHopper}
-            disabled={landmarks.length === 0}
-            className="px-3 py-2 bg-green-500 text-white rounded text-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
-          >
-            Export for Grasshopper
-          </button>
+          {/* Landmark Count */}
+          <div className="flex items-center justify-between p-3 bg-muted/50 rounded-md">
+            <span className="text-sm font-medium">Landmarks:</span>
+            <span className="text-sm font-bold text-primary">{landmarks.length}</span>
+          </div>
 
-          <button
-            onClick={onHandleRhinoCompute}
-            disabled={landmarks.length === 0}
-            className="px-3 py-2 bg-green-500 text-white rounded text-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
-          >
-            Compute
-          </button>
-        </div>
+          {/* Action Buttons */}
+          <div className="space-y-2">
+            <Button
+              onClick={clearAllLandmarks}
+              disabled={landmarks.length === 0}
+              variant="destructive"
+              size="sm"
+              className="w-full"
+            >
+              Clear All
+            </Button>
+            <Button
+              onClick={exportLandmarksGrassHopper}
+              disabled={landmarks.length === 0}
+              variant="outline"
+              size="sm"
+              className="w-full"
+            >
+              Export for Grasshopper
+            </Button>
+            <Button
+              onClick={onHandleRhinoCompute}
+              disabled={landmarks.length === 0}
+              variant="outline"
+              size="sm"
+              className="w-full"
+            >
+              Compute
+            </Button>
+          </div>
 
-        {/* Instructions */}
-        <div className="mt-4 p-2 bg-blue-50 rounded text-xs text-blue-800">
-          <strong>Instructions:</strong>
-          <br />
-          • Click on the 3D model to add landmarks
-          <br />
-          • Click on red spheres to remove them
-          <br />• Use mouse to orbit, zoom, and pan
+          {/* Instructions */}
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
+            <h4 className="text-sm font-semibold text-blue-900 mb-2">Instructions:</h4>
+            <ul className="text-xs text-blue-800 space-y-1">
+              <li>• Click on the 3D model to add landmarks</li>
+              <li>• Click on red spheres to remove them</li>
+              <li>• Use mouse to orbit, zoom, and pan</li>
+            </ul>
+          </div>
         </div>
       </div>
 
       {/* Landmark List */}
       {landmarks.length > 0 && (
-        <div className="absolute top-4 right-4 z-10 bg-white p-4 rounded-lg shadow-lg max-w-xs max-h-96 overflow-y-auto">
-          <h3 className="text-md font-semibold mb-2">Landmarks List</h3>
-          <div className="space-y-2">
-            {landmarks.map((landmark, index) => (
-              <div key={landmark.id} className="text-xs bg-gray-50 p-2 rounded">
-                <div className="font-medium">Landmark {index + 1}</div>
-                <div className="text-gray-600">
-                  X: {landmark.position[0].toFixed(2)}
-                  <br />
-                  Y: {landmark.position[1].toFixed(2)}
-                  <br />
-                  Z: {landmark.position[2].toFixed(2)}
+        <div className="absolute top-6 right-6 z-10 bg-background p-6 rounded-lg shadow-lg border max-w-xs max-h-96 overflow-y-auto">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold">Landmarks List</h3>
+              <p className="text-sm text-muted-foreground">
+                {landmarks.length} landmark{landmarks.length !== 1 ? 's' : ''} placed
+              </p>
+            </div>
+            <div className="space-y-3">
+              {landmarks.map((landmark, index) => (
+                <div key={landmark.id} className="p-3 bg-muted/50 rounded-md space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Landmark {index + 1}</span>
+                    <Button
+                      onClick={() => handleLandmarkRemove(landmark.id)}
+                      variant="destructive"
+                      size="sm"
+                      className="h-6 px-2 text-xs"
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                  <div className="text-xs text-muted-foreground space-y-1">
+                    <div>X: {landmark.position[0].toFixed(2)}</div>
+                    <div>Y: {landmark.position[1].toFixed(2)}</div>
+                    <div>Z: {landmark.position[2].toFixed(2)}</div>
+                  </div>
                 </div>
-                <button
-                  onClick={() => handleLandmarkRemove(landmark.id)}
-                  className="mt-1 px-2 py-1 bg-red-400 text-white rounded text-xs"
-                >
-                  Remove
-                </button>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       )}
