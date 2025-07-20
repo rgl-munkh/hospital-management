@@ -12,6 +12,18 @@ import { uploadToSupabaseStorage } from "@/lib/supabase-storage";
 import { createScan } from "@/lib/scans/actions";
 import { toast } from "sonner";
 import { fetchScansByTypeAndPatientId } from "@/lib/scans/data";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+
+// File metadata type
+interface FileMetadata {
+  name: string;
+  size: number;
+  type: string;
+  lastModified: number;
+  sizeFormatted: string;
+  lastModifiedFormatted: string;
+}
 
 function STLMesh({ geometry }: { geometry: THREE.BufferGeometry | null }) {
   if (!geometry) return null;
@@ -28,7 +40,22 @@ const UploadMeshPage = () => {
 
   const [geometry, setGeometry] = useState<THREE.BufferGeometry | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [fileMetadata, setFileMetadata] = useState<FileMetadata | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  // Helper function to format file size
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  // Helper function to format date
+  const formatDate = (timestamp: number): string => {
+    return new Date(timestamp).toLocaleString();
+  };
 
   useEffect(() => {
     const fetchScans = async () => {
@@ -86,6 +113,17 @@ const UploadMeshPage = () => {
 
     setFile(file);
 
+    // Extract and set file metadata
+    const metadata: FileMetadata = {
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      lastModified: file.lastModified,
+      sizeFormatted: formatFileSize(file.size),
+      lastModifiedFormatted: formatDate(file.lastModified),
+    };
+    setFileMetadata(metadata);
+
     // parse the file
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -142,6 +180,7 @@ const UploadMeshPage = () => {
       toast.success("STL file uploaded successfully!");
       setFile(null);
       setGeometry(null);
+      setFileMetadata(null);
     } catch (error) {
       toast.error("Failed to save patient: " + error);
       setIsSubmitting(false);
@@ -173,6 +212,42 @@ const UploadMeshPage = () => {
           {isSubmitting ? "Saving..." : "Save STL & Patient"}
         </Button>
       </div>
+
+      {/* File Metadata Display */}
+      {fileMetadata && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              File Information
+              <Badge variant="secondary">STL</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">File Name</p>
+                <p className="text-sm">{fileMetadata.name}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">File Size</p>
+                <p className="text-sm">{fileMetadata.sizeFormatted}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">File Type</p>
+                <p className="text-sm">{fileMetadata.type || "application/sla"}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Last Modified</p>
+                <p className="text-sm">{fileMetadata.lastModifiedFormatted}</p>
+              </div>
+            </div>
+            <div className="pt-2 border-t">
+              <p className="text-sm font-medium text-muted-foreground">Raw Size (bytes)</p>
+              <p className="text-sm font-mono">{fileMetadata.size.toLocaleString()}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="w-full h-[calc(100vh-280px)] border border-border rounded-lg overflow-hidden bg-background">
         <Canvas camera={{ position: [50, 50, 100], fov: 60 }}>

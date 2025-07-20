@@ -6,19 +6,13 @@ A modern, AI-powered medical data management platform built for orthotic prescri
 
 ### ✅ Core Functionality
 - **Patient Management**: Complete CRUD operations for patient records
+- **Hospital Management**: Manage multiple hospital locations and data
 - **Media Upload**: Secure file upload for patient photos, videos, and 3D scans
+- **3D Model Viewer**: Interactive STL model visualization with multiple scan types
 - **Physical Measurements**: Track height, weight, shoe size, and other vital data
 - **Emergency Contacts**: Manage emergency contact information
 - **Responsive Dashboard**: Modern, mobile-friendly interface
 - **Real-time Updates**: Server-side rendering with Next.js App Router
-
-### 🔄 Coming Soon (MVP Roadmap)
-- **User Authentication**: Role-based access control (Admin, Doctor, Technician)
-- **Prescriptions**: Create and manage orthotic prescriptions
-- **Diagnoses**: Add diagnosis information with GMFCS levels
-- **3D Scan Visualization**: STL model viewer and analysis
-- **Audit Logging**: Complete change tracking and history
-- **Admin Panel**: User management and system monitoring
 
 ## 🛠️ Tech Stack
 
@@ -26,7 +20,7 @@ A modern, AI-powered medical data management platform built for orthotic prescri
 - **UI Components**: Shadcn/ui with Radix UI primitives
 - **Database**: PostgreSQL with Drizzle ORM
 - **File Storage**: Supabase Storage
-- **State Management**: Zustand
+- **3D Visualization**: React Three Fiber with Drei
 - **Forms**: React Hook Form with Zod validation
 - **Icons**: Lucide React
 - **Authentication**: NextAuth.js (ready for implementation)
@@ -36,11 +30,10 @@ A modern, AI-powered medical data management platform built for orthotic prescri
 The system includes comprehensive data models:
 
 - **Users & Roles**: Multi-role user management
+- **Hospitals**: Hospital information and management
 - **Patients**: Complete patient information and medical history
-- **Prescriptions**: Orthotic prescriptions and treatment plans
-- **Diagnoses**: Medical diagnoses with GMFCS classifications
 - **Media Files**: Patient photos, videos, and documentation
-- **3D Scans**: STL models and scan versions
+- **3D Scans**: STL models and scan versions with type classification
 - **External Files**: PDF reports and medical documents
 - **Audit Logs**: Complete change tracking and compliance
 
@@ -104,6 +97,7 @@ hospital-management/
 │   ├── app/                    # Next.js App Router
 │   │   ├── dashboard/          # Main dashboard pages
 │   │   │   ├── patients/       # Patient management
+│   │   │   ├── hospitals/      # Hospital management
 │   │   │   └── layout.tsx      # Dashboard layout
 │   │   ├── ui/                 # App-specific UI components
 │   │   └── globals.css         # Global styles
@@ -114,6 +108,8 @@ hospital-management/
 │   │   └── migrations/         # Database migrations
 │   ├── lib/                    # Utilities and data access
 │   │   ├── patients/           # Patient-related functions
+│   │   ├── hospitals/          # Hospital-related functions
+│   │   ├── scans/              # 3D scan operations
 │   │   ├── media-files/        # Media file operations
 │   │   ├── supabase-storage.ts # File storage utilities
 │   │   └── definitions.ts      # TypeScript type definitions
@@ -129,6 +125,7 @@ hospital-management/
 - **Accessibility**: Built with accessibility in mind
 - **Light Theme**: Professional medical environment design
 - **Component Library**: Consistent, reusable UI components
+- **3D Visualization**: Interactive 3D model viewing capabilities
 
 ## 🔧 Available Scripts
 
@@ -165,8 +162,8 @@ npm run db:seed
 
 - **Data Encryption**: Secure database connections
 - **File Security**: Protected file uploads with Supabase
-- **Audit Trail**: Complete change logging (coming soon)
-- **Role-based Access**: Multi-level user permissions (coming soon)
+- **Audit Trail**: Complete change logging
+- **Role-based Access**: Multi-level user permissions (ready for implementation)
 - **HIPAA Ready**: Designed with medical data compliance in mind
 
 ## 🚀 Deployment
@@ -201,17 +198,6 @@ For support and questions:
 - Create an issue in the GitHub repository
 - Check the documentation in the `/docs` folder
 - Review the PRD.md file for detailed requirements
-
-## 🔮 Roadmap
-
-- [ ] User authentication and authorization
-- [ ] Prescription management system
-- [ ] Diagnosis tracking with GMFCS levels
-- [ ] 3D scan visualization and analysis
-- [ ] Advanced reporting and analytics
-- [ ] Mobile app companion
-- [ ] AI-powered diagnosis assistance
-- [ ] Integration with medical devices
 
 ---
 
