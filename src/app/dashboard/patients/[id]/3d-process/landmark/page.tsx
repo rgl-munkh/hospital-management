@@ -126,23 +126,19 @@ function Scene({
       <gridHelper args={[1000, 100]} />
       {/* Studio lighting setup */}
       <ambientLight intensity={0.4} />
-      <directionalLight 
-        position={[50, 50, 50]} 
-        intensity={0.8} 
-        castShadow 
+      <directionalLight
+        position={[50, 50, 50]}
+        intensity={0.8}
+        castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
       />
-      <directionalLight 
-        position={[-50, -50, -50]} 
-        intensity={0.3} 
+      <directionalLight
+        position={[-50, -50, -50]}
+        intensity={0.3}
         color="#ffffff"
       />
-      <pointLight 
-        position={[0, 100, 0]} 
-        intensity={0.5} 
-        color="#ffffff"
-      />
+      <pointLight position={[0, 100, 0]} intensity={0.5} color="#ffffff" />
 
       <group
         ref={meshRef}
@@ -290,23 +286,22 @@ export default function LandmarkModelViewer() {
           <div className="space-y-2">
             <label className="text-sm font-medium">Mode:</label>
             <div className="flex gap-2">
-              <button
+              <Button
                 onClick={() => setMode("add")}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  mode === "add"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:bg-muted/80"
-                }`}
+                variant="ghost"
+                className={`px-3 py-2 rounded-md text-sm font-medium`}
               >
                 Add Landmarks
-              </button>
+              </Button>
             </div>
           </div>
 
           {/* Landmark Count */}
           <div className="flex items-center justify-between p-3 bg-muted/50 rounded-md">
             <span className="text-sm font-medium">Landmarks:</span>
-            <span className="text-sm font-bold text-primary">{landmarks.length}</span>
+            <span className="text-sm font-bold text-primary">
+              {landmarks.length}
+            </span>
           </div>
 
           {/* Action Buttons */}
@@ -341,9 +336,11 @@ export default function LandmarkModelViewer() {
           </div>
 
           {/* Instructions */}
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
-            <h4 className="text-sm font-semibold text-blue-900 mb-2">Instructions:</h4>
-            <ul className="text-xs text-blue-800 space-y-1">
+          <div className="p-4 bg-brand-50 border border-brand-200 rounded-md">
+            <h4 className="text-sm font-semibold text-brand-900 mb-2">
+              Instructions:
+            </h4>
+            <ul className="text-xs text-brand-800 space-y-1">
               <li>• Click on the 3D model to add landmarks</li>
               <li>• Click on red spheres to remove them</li>
               <li>• Use mouse to orbit, zoom, and pan</li>
@@ -359,14 +356,20 @@ export default function LandmarkModelViewer() {
             <div className="space-y-2">
               <h3 className="text-lg font-semibold">Landmarks List</h3>
               <p className="text-sm text-muted-foreground">
-                {landmarks.length} landmark{landmarks.length !== 1 ? 's' : ''} placed
+                {landmarks.length} landmark{landmarks.length !== 1 ? "s" : ""}{" "}
+                placed
               </p>
             </div>
             <div className="space-y-3">
               {landmarks.map((landmark, index) => (
-                <div key={landmark.id} className="p-3 bg-muted/50 rounded-md space-y-2">
+                <div
+                  key={landmark.id}
+                  className="p-3 bg-muted/50 rounded-md space-y-2"
+                >
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Landmark {index + 1}</span>
+                    <span className="text-sm font-medium">
+                      Landmark {index + 1}
+                    </span>
                     <Button
                       onClick={() => handleLandmarkRemove(landmark.id)}
                       variant="destructive"

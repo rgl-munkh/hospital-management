@@ -186,7 +186,12 @@ function FileSelectionHeader({
   return (
     <div className="flex items-center justify-between">
       <h3 className="font-medium">Selected Files ({fileCount})</h3>
-      <Button variant="outline" size="sm" onClick={onClearAll}>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onClearAll}
+        className=""
+      >
         Clear All
       </Button>
     </div>
@@ -424,9 +429,9 @@ export function MediaUploadCard({ patientId }: MediaUploadCardProps) {
             variant="outline"
             size="sm"
             asChild
-            className="cursor-pointer"
+            className=""
           >
-            <label htmlFor="media-upload" className="cursor-pointer">
+            <label htmlFor="media-upload" className="">
               Choose Files
             </label>
           </Button>

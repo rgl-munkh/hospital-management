@@ -157,38 +157,40 @@ const UploadMeshPage = () => {
         </p>
       </div>
 
-      <div className="space-y-4">
-        <div className="flex items-center gap-4">
-          <Input
-            type="file"
-            onChange={onFileInputChange}
-            accept=".stl"
-            className="max-w-sm"
-          />
-        </div>
+      <div className="flex items-center justify-between">
+        <Input
+          type="file"
+          onChange={onFileInputChange}
+          accept=".stl"
+          className="max-w-sm"
+        />
+        <Button
+          type="button"
+          className=""
+          onClick={submitPatient}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Saving..." : "Save STL & Patient"}
+        </Button>
       </div>
 
       <div className="w-full h-[calc(100vh-280px)] border border-border rounded-lg overflow-hidden bg-background">
         <Canvas camera={{ position: [50, 50, 100], fov: 60 }}>
           {/* Studio lighting setup */}
           <ambientLight intensity={0.4} />
-          <directionalLight 
-            position={[50, 50, 50]} 
-            intensity={0.8} 
-            castShadow 
+          <directionalLight
+            position={[50, 50, 50]}
+            intensity={0.8}
+            castShadow
             shadow-mapSize-width={2048}
             shadow-mapSize-height={2048}
           />
-          <directionalLight 
-            position={[-50, -50, -50]} 
-            intensity={0.3} 
+          <directionalLight
+            position={[-50, -50, -50]}
+            intensity={0.3}
             color="#ffffff"
           />
-          <pointLight 
-            position={[0, 100, 0]} 
-            intensity={0.5} 
-            color="#ffffff"
-          />
+          <pointLight position={[0, 100, 0]} intensity={0.5} color="#ffffff" />
           <OrbitControls />
           {geometry && <STLMesh geometry={geometry} />}
           <axesHelper args={[200]} />
@@ -200,16 +202,6 @@ const UploadMeshPage = () => {
             />
           </GizmoHelper>
         </Canvas>
-      </div>
-
-      <div className="flex justify-end">
-        <Button
-          type="button"
-          onClick={submitPatient}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Saving..." : "Save STL & Patient"}
-        </Button>
       </div>
     </div>
   );

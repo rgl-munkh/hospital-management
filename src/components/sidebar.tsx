@@ -69,7 +69,7 @@ export function DashboardSidebar() {
               {navigation.map((item) => {
                 const isActive =
                   pathname === item.href ||
-                  pathname.startsWith(item.href + "/");
+                  pathname.endsWith(item.href + "/");
                 return (
                   <SidebarMenuItem key={item.name}>
                     <SidebarMenuButton
@@ -77,6 +77,7 @@ export function DashboardSidebar() {
                       isActive={isActive}
                       aria-label={`Navigate to ${item.name} - ${item.description}`}
                       title={item.description}
+                      className=""
                     >
                       <Link href={item.href}>
                         <item.icon className="h-4 w-4" aria-hidden="true" />

@@ -96,7 +96,7 @@ export function CreateForm() {
         <Button
           type="submit"
           disabled={isPending}
-          className="min-w-[120px] cursor-pointer"
+          className="min-w-[120px]"
         >
           {isPending ? (
             <>

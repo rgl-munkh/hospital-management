@@ -42,6 +42,7 @@ export function StlViewCard() {
             onClick={() => fileInputRef.current?.click()}
             variant="outline"
             size="sm"
+            className=""
           >
             Upload STL Model
           </Button>

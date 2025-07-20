@@ -4,8 +4,8 @@ import { Plus } from "lucide-react";
 
 export function CreatePatient() {
   return (
-    <Button asChild>
-      <Link href="/dashboard/patients/create">
+    <Button>
+      <Link href="/dashboard/patients/create" className="flex items-center">
         <Plus className="mr-2 h-4 w-4" />
         Create Patient
       </Link>

@@ -74,7 +74,7 @@ export function QuickActions() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link href={action.href}>
-                  <Card className="p-4 hover:bg-muted/50 cursor-pointer transition-colors group relative">
+                  <Card className="p-4 hover:bg-muted/50 transition-colors group relative">
                     <div className="flex items-center space-x-3">
                       <div className="relative">
                         <action.icon className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />

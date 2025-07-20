@@ -138,7 +138,7 @@ const PhysicalMeasurementsForm = ({
             <Button
               type="submit"
               disabled={isPending}
-              className="cursor-pointer"
+              className=""
             >
               {isPending ? "Saving..." : "Save changes"}
             </Button>
