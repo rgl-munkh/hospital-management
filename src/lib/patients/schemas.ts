@@ -12,13 +12,16 @@ export const createPatientSchema = z.object({
     .string()
     .min(2, "First name must be at least 2 characters")
     .regex(
-      /^[a-zA-Z\s]+$/,
-      "First name must contain only letters and spaces"
+      /^[\p{L}\s-]+$/u,
+      "First name must contain only letters, spaces, and hyphens"
     ),
   lastName: z
     .string()
     .min(2, "Last name must be at least 2 characters")
-    .regex(/^[a-zA-Z\s]+$/, "Last name must contain only letters and spaces"),
+    .regex(
+      /^[\p{L}\s-]+$/u,
+      "Last name must contain only letters, spaces, and hyphens"
+    ),
 });
 
 export const updatePatientSchema = z.object({
@@ -77,4 +80,4 @@ export const updatePatientSchema = z.object({
   emergencyName: z.string().optional(),
   emergencyRelation: z.string().optional(),
   emergencyPhone: z.string().optional(),
-}); 
+});

@@ -31,7 +31,7 @@ export function PatientTabs({ patient }: PatientTabsProps) {
         </TabsTrigger>
         <TabsTrigger value="model" className="flex items-center gap-2">
           <Box className="h-4 w-4" />
-          STL Model
+          Scan review
         </TabsTrigger>
       </TabsList>
 
@@ -80,7 +80,7 @@ export function PatientTabs({ patient }: PatientTabsProps) {
 
       {/* STL Model Tab */}
       <TabsContent value="model" className="space-y-6">
-        <StlViewCard />
+        <StlViewCard patientId={patient.id} />
       </TabsContent>
     </Tabs>
   );

@@ -12,10 +12,10 @@ export function PatientHeader({
   return (
     <div className="flex items-center justify-between">
       <div>
-        <h1 className="text-3xl font-bold">Patient Details</h1>
-        <p className="text-muted-foreground">
-          {firstName} {lastName} ({patientCode})
-        </p>
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          {firstName} {lastName}
+          <p className="text-muted-foreground text-sm">({patientCode})</p>
+        </h1>
       </div>
     </div>
   );
