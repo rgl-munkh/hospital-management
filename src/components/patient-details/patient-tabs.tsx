@@ -8,6 +8,8 @@ import { EmergencyContactCard } from "./emergency-contact-card";
 import { MediaUploadCard } from "./media-upload-card";
 import { Patient } from "@/lib/definitions";
 import { StlViewCard } from "./stl-view-card";
+import DiagnosisForm from "./DiagnosisForm";
+import PrescriptionForm from "./PrescriptionForm";
 
 interface PatientTabsProps {
   patient: Patient;
@@ -16,22 +18,26 @@ interface PatientTabsProps {
 export function PatientTabs({ patient }: PatientTabsProps) {
   return (
     <Tabs defaultValue="basic" className="space-y-6">
-      <TabsList className="grid w-full grid-cols-4">
+      <TabsList className="grid w-full grid-cols-5">
         <TabsTrigger value="basic" className="flex items-center gap-2">
           <User className="h-4 w-4" />
           Basic Info
-        </TabsTrigger>
-        <TabsTrigger value="prescription" className="flex items-center gap-2">
-          <Pill className="h-4 w-4" />
-          Prescription
         </TabsTrigger>
         <TabsTrigger value="media" className="flex items-center gap-2">
           <ImageIcon className="h-4 w-4" />
           Media
         </TabsTrigger>
+        <TabsTrigger value="diagnosis" className="flex items-center gap-2">
+          <Pill className="h-4 w-4" />
+          Diagnosis
+        </TabsTrigger>
+        <TabsTrigger value="prescription" className="flex items-center gap-2">
+          <Pill className="h-4 w-4" />
+          Prescription
+        </TabsTrigger>
         <TabsTrigger value="model" className="flex items-center gap-2">
           <Box className="h-4 w-4" />
-          Scan review
+          3D Scan review
         </TabsTrigger>
       </TabsList>
 
@@ -62,15 +68,14 @@ export function PatientTabs({ patient }: PatientTabsProps) {
         </div>
       </TabsContent>
 
+      {/* Diagnosis Tab */}
+      <TabsContent value="diagnosis" className="space-y-6">
+        <DiagnosisForm patientId={patient.id} initialData={{}} />
+      </TabsContent>
+
       {/* Prescription Tab */}
       <TabsContent value="prescription" className="space-y-6">
-        {/* <EmptyStateCard
-          title="Prescription Information"
-          description="No prescription data available"
-          icon={Pill}
-          actionText="Add Prescription"
-          actionHref={`/dashboard/patients/${patient.id}/edit?tab=prescription`}
-        /> */}
+        <PrescriptionForm patientId={patient.id} />
       </TabsContent>
 
       {/* Media Tab */}
