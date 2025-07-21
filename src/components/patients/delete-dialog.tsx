@@ -35,7 +35,7 @@ export function DeleteDialog({ patientId, patientName }: DeleteDialogProps) {
       router.refresh();
     } catch (error) {
       console.error("Failed to delete patient:", error);
-      toast.error("Failed to delete patient");
+      toast.error((error as Error).message);
     } finally {
       setIsDeleting(false);
     }

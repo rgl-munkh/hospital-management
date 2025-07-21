@@ -1,33 +1,51 @@
 import React, { useState } from "react";
 import { createPrescription } from "@/lib/prescriptions/actions";
-import { getPrescriptionByPatientId, updatePrescription } from "@/lib/prescriptions/actions";
+import {
+  getPrescriptionByPatientId,
+  updatePrescription,
+} from "@/lib/prescriptions/actions";
 import { useEffect } from "react";
+import Image from "next/image";
+import { Textarea } from "../ui/textarea";
+import { Button } from "../ui/button";
+import { CheckCircle2Icon } from "lucide-react";
+import { toast } from "sonner";
 
 const GMFCS_LEVELS = [
   {
     level: "Level I",
     description: "Walks without limitations.",
-    implications: "Lightweight, flexible AFO; possibly dynamic or hinged AFO to allow ankle motion.",
+    implications:
+      "Lightweight, flexible AFO; possibly dynamic or hinged AFO to allow ankle motion.",
+    image: "/gmfcs-levels/level-1.png",
   },
   {
     level: "Level II",
     description: "Walks with limitations (e.g., uneven terrain, stair).",
-    implications: "May need more stability—posterior leaf spring or articulated AFO depending on strength/spasticity.",
+    implications:
+      "May need more stability—posterior leaf spring or articulated AFO depending on strength/spasticity.",
+    image: "/gmfcs-levels/level-2.png",
   },
   {
     level: "Level III",
     description: "Walks with assistive device.",
-    implications: "Solid or GRAFO for max stability; consider anterior shell for weak plantarflexors.",
+    implications:
+      "Solid or GRAFO for max stability; consider anterior shell for weak plantarflexors.",
+    image: "/gmfcs-levels/level-3.png",
   },
   {
     level: "Level IV",
     description: "Limited self-mobility, powered mobility.",
-    implications: "Custom molded solid AFO with strong support; foot positioning and tone control prioritized.",
+    implications:
+      "Custom molded solid AFO with strong support; foot positioning and tone control prioritized.",
+    image: "/gmfcs-levels/level-4.png",
   },
   {
     level: "Level V",
     description: "Transported in manual wheelchair.",
-    implications: "Focus on positioning, tone management, and comfort; possibly orthotic for non-ambulatory use.",
+    implications:
+      "Focus on positioning, tone management, and comfort; possibly orthotic for non-ambulatory use.",
+    image: "/gmfcs-levels/level-5.png",
   },
 ];
 
@@ -41,7 +59,10 @@ const DIAGNOSIS_OPTIONS = [
       },
       {
         name: "Ankle Dorsiflexion Hypertonia",
-        recommendations: ["Anterior shell solid", "Anterior shell with strong joint"],
+        recommendations: [
+          "Anterior shell solid",
+          "Anterior shell with strong joint",
+        ],
       },
       {
         name: "Ankle Plantarflexion Hypotonia",
@@ -89,7 +110,6 @@ interface DiagnosisData {
   gmfcsLevel: string;
   diagnosisCategory: string;
   diagnosisSubtype: string;
-  afoRecommendation: string;
   notes: string;
 }
 
@@ -100,11 +120,19 @@ interface DiagnosisFormProps {
   createdBy?: string;
 }
 
-export default function DiagnosisForm({ initialData, onSave, patientId, createdBy }: DiagnosisFormProps) {
+export default function DiagnosisForm({
+  initialData,
+  onSave,
+  patientId,
+  createdBy,
+}: DiagnosisFormProps) {
   const [gmfcsLevel, setGmfcsLevel] = useState(initialData?.gmfcsLevel || "");
-  const [diagnosisCategory, setDiagnosisCategory] = useState(initialData?.diagnosisCategory || "");
-  const [diagnosisSubtype, setDiagnosisSubtype] = useState(initialData?.diagnosisSubtype || "");
-  const [afoRecommendation, setAfoRecommendation] = useState(initialData?.afoRecommendation || "");
+  const [diagnosisCategory, setDiagnosisCategory] = useState(
+    initialData?.diagnosisCategory || ""
+  );
+  const [diagnosisSubtype, setDiagnosisSubtype] = useState(
+    initialData?.diagnosisSubtype || ""
+  );
   const [notes, setNotes] = useState(initialData?.notes || "");
   const [saving, setSaving] = useState(false);
   const [prescriptionId, setPrescriptionId] = useState<string | null>(null);
@@ -117,7 +145,6 @@ export default function DiagnosisForm({ initialData, onSave, patientId, createdB
         setGmfcsLevel(data.diagnosisSummary?.split(" - ")[0] || "");
         setDiagnosisCategory(data.diagnosisSummary?.split(" - ")[1] || "");
         setDiagnosisSubtype(data.diagnosisSummary?.split(" - ")[2] || "");
-        setAfoRecommendation(data.orthoticType || "");
         setNotes(data.notes || "");
       }
     }
@@ -125,9 +152,10 @@ export default function DiagnosisForm({ initialData, onSave, patientId, createdB
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [patientId]);
 
-  const selectedCategory = DIAGNOSIS_OPTIONS.find(c => c.category === diagnosisCategory);
-  const selectedSubtype = selectedCategory?.subtypes.find(s => s.name === diagnosisSubtype);
-  const selectedGmfcs = GMFCS_LEVELS.find(l => l.level === gmfcsLevel);
+  const selectedCategory = DIAGNOSIS_OPTIONS.find(
+    (c) => c.category === diagnosisCategory
+  );
+  const selectedGmfcs = GMFCS_LEVELS.find((l) => l.level === gmfcsLevel);
 
   const handleSave = async () => {
     setSaving(true);
@@ -136,118 +164,168 @@ export default function DiagnosisForm({ initialData, onSave, patientId, createdB
         await updatePrescription(prescriptionId, {
           patientId,
           diagnosisSummary: `${gmfcsLevel} - ${diagnosisCategory} - ${diagnosisSubtype}`,
-          orthoticType: afoRecommendation,
           notes,
           createdBy,
         });
         setSaving(false);
-        if (onSave) onSave({ gmfcsLevel, diagnosisCategory, diagnosisSubtype, afoRecommendation, notes });
+        if (onSave)
+          onSave({
+            gmfcsLevel,
+            diagnosisCategory,
+            diagnosisSubtype,
+            notes,
+          });
         alert("Diagnosis updated!");
       } else {
         const created = await createPrescription({
           patientId,
           diagnosisSummary: `${gmfcsLevel} - ${diagnosisCategory} - ${diagnosisSubtype}`,
-          orthoticType: afoRecommendation,
           notes,
           createdBy,
         });
         setPrescriptionId(created.id);
         setSaving(false);
-        if (onSave) onSave({ gmfcsLevel, diagnosisCategory, diagnosisSubtype, afoRecommendation, notes });
+        if (onSave)
+          onSave({
+            gmfcsLevel,
+            diagnosisCategory,
+            diagnosisSubtype,
+            notes,
+          });
         alert("Diagnosis saved!");
       }
     } catch (error) {
       setSaving(false);
-      alert("Failed to save diagnosis. Please try again.");
+      toast.error((error as Error).message);
     }
   };
 
   return (
-    <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSave(); }}>
-      <div>
-        <label className="block font-medium mb-1">GMFCS Level</label>
-        <select
-          className="w-full border rounded p-2"
-          value={gmfcsLevel}
-          onChange={e => setGmfcsLevel(e.target.value)}
-        >
-          <option value="">Select Level</option>
-          {GMFCS_LEVELS.map(l => (
-            <option key={l.level} value={l.level}>{l.level}</option>
-          ))}
-        </select>
-        {selectedGmfcs && (
-          <div className="mt-2 text-sm text-gray-600">
-            <div><b>Description:</b> {selectedGmfcs.description}</div>
-            <div><b>AFO Implications:</b> {selectedGmfcs.implications}</div>
+    <form
+      className="space-y-6"
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleSave();
+      }}
+    >
+      <div className="space-y-8">
+        {/* Diagnosis Category Section */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold mb-4">Diagnosis Category</h2>
+          <div className="grid grid-cols-3 gap-4">
+            {DIAGNOSIS_OPTIONS.map((category) => (
+              <div
+                key={category.category}
+                className={`border rounded-lg p-4 cursor-pointer text-center transition-all duration-150 flex items-center gap-2
+            ${
+              diagnosisCategory === category.category
+                ? "border-brand-500 bg-brand-50 shadow"
+                : "border-gray-200 bg-white"
+            }
+            hover:shadow-md`}
+                onClick={() => setDiagnosisCategory(category.category)}
+              >
+                {diagnosisCategory === category.category && (
+                  <span className="text-brand-500 material-icons">
+                    <CheckCircle2Icon size={16} />
+                  </span>
+                )}
+                <span className="font-medium">{category.category}</span>
+              </div>
+            ))}
           </div>
-        )}
-      </div>
-      <div>
-        <label className="block font-medium mb-1">Diagnosis Category</label>
-        <select
-          className="w-full border rounded p-2"
-          value={diagnosisCategory}
-          onChange={e => {
-            setDiagnosisCategory(e.target.value);
-            setDiagnosisSubtype("");
-            setAfoRecommendation("");
-          }}
-        >
-          <option value="">Select Category</option>
-          {DIAGNOSIS_OPTIONS.map(c => (
-            <option key={c.category} value={c.category}>{c.category}</option>
-          ))}
-        </select>
-      </div>
-      {selectedCategory && (
-        <div>
-          <label className="block font-medium mb-1">Subtype</label>
-          <select
-            className="w-full border rounded p-2"
-            value={diagnosisSubtype}
-            onChange={e => {
-              setDiagnosisSubtype(e.target.value);
-              setAfoRecommendation("");
-            }}
-          >
-            <option value="">Select Subtype</option>
-            {selectedCategory.subtypes.map(s => (
-              <option key={s.name} value={s.name}>{s.name}</option>
-            ))}
-          </select>
         </div>
-      )}
-      {selectedSubtype && (
-        <div>
-          <label className="block font-medium mb-1">AFO Recommendation</label>
-          <select
-            className="w-full border rounded p-2"
-            value={afoRecommendation}
-            onChange={e => setAfoRecommendation(e.target.value)}
-          >
-            <option value="">Select Recommendation</option>
-            {selectedSubtype.recommendations.map(r => (
-              <option key={r} value={r}>{r}</option>
+
+        {/* Diagnosis Subtype Section */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold mb-4">Diagnosis Subtype</h2>
+          <div className="grid grid-cols-3 gap-4">
+            {selectedCategory?.subtypes.map((subtype) => (
+              <div
+                key={subtype.name}
+                className={`border rounded-lg p-4 cursor-pointer text-center transition-all duration-150 flex items-center gap-2
+            ${
+              diagnosisSubtype === subtype.name
+                ? "border-brand-500 bg-brand-50 shadow"
+                : "border-gray-200 bg-white"
+            }
+            hover:shadow-md`}
+                onClick={() => setDiagnosisSubtype(subtype.name)}
+              >
+                {diagnosisSubtype === subtype.name && (
+                  <span className="text-brand-500 material-icons">
+                    <CheckCircle2Icon size={16} />
+                  </span>
+                )}
+                <span className="font-medium">{subtype.name}</span>
+              </div>
             ))}
-          </select>
+          </div>
+          {/* GMFCS Level Section */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold mb-4">GMFCS Level</h2>
+            {selectedGmfcs && (
+              <div className="mb-4 text-sm text-gray-600">
+                <b>AFO Implications:</b> {selectedGmfcs.implications}
+              </div>
+            )}
+            <div className="grid grid-cols-3 gap-4">
+              {GMFCS_LEVELS.map((level) => (
+                <div
+                  key={level.level}
+                  className={`border rounded-lg p-4 cursor-pointer flex flex-col items-center transition-all duration-150
+            ${
+              gmfcsLevel === level.level
+                ? "border-brand-500 bg-brand-50 shadow"
+                : "border-gray-200 bg-white"
+            }
+            hover:shadow-md`}
+                  onClick={() => setGmfcsLevel(level.level)}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-bold text-base">{level.level}</span>
+                    {gmfcsLevel === level.level && (
+                      <span className="text-brand-500 material-icons">
+                        <CheckCircle2Icon size={16} />
+                      </span>
+                    )}
+                  </div>
+                  <Image
+                    src={level.image}
+                    alt={level.level}
+                    width={80}
+                    height={80}
+                    className="rounded"
+                  />
+                  <p className="text-xs text-gray-500 mt-2 text-center">
+                    {level.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      )}
-      <div>
-        <label className="block font-medium mb-1">Notes & Additional Recommendations</label>
-        <textarea
-          className="w-full border rounded p-2 min-h-[80px]"
-          value={notes}
-          onChange={e => setNotes(e.target.value)}
-        />
+
+        {/* Notes Section */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold mb-4">
+            Notes & Additional Recommendations
+          </h2>
+          <Textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            className="w-full min-h-[80px] border-gray-300 rounded"
+            placeholder="Add any notes or recommendations here..."
+          />
+        </div>
+
+        {/* Submit Button */}
+        <div className="flex justify-end sticky bottom-0 bg-gradient-to-t from-white pt-4 pb-2 z-10">
+          <Button type="submit" disabled={saving} className="w-[140px]">
+            {saving ? "Saving..." : "Save"}
+          </Button>
+        </div>
       </div>
-      <button
-        type="submit"
-        className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
-        disabled={saving}
-      >
-        {saving ? "Saving..." : "Save"}
-      </button>
     </form>
   );
-} 
+}

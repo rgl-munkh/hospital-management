@@ -10,6 +10,7 @@ import { Patient } from "@/lib/definitions";
 import { StlViewCard } from "./stl-view-card";
 import DiagnosisForm from "./DiagnosisForm";
 import PrescriptionForm from "./PrescriptionForm";
+import PrescriptionFormV2 from "./PrescriptionFormV2";
 
 interface PatientTabsProps {
   patient: Patient;
@@ -75,7 +76,8 @@ export function PatientTabs({ patient }: PatientTabsProps) {
 
       {/* Prescription Tab */}
       <TabsContent value="prescription" className="space-y-6">
-        <PrescriptionForm patientId={patient.id} />
+        {/* <PrescriptionForm patientId={patient.id} /> */}
+        <PrescriptionFormV2 patientId={patient.id} patient={patient} />
       </TabsContent>
 
       {/* Media Tab */}
