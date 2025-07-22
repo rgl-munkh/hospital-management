@@ -14,13 +14,14 @@ export async function uploadToSupabaseStorage(
   bucket: string,
   file: File,
   path: string,
-  contentType: string
+  contentType: string,
+  allowOverwrite: boolean = false
 ): Promise<UploadResult> {
   try {
     const { error } = await supabase.storage.from(bucket).upload(path, file, {
       contentType,
       cacheControl: "3600",
-      upsert: false,
+      upsert: allowOverwrite,
     });
 
     if (error) {

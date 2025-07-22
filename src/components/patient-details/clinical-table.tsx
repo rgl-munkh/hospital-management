@@ -12,11 +12,15 @@ import {
   ROM_RANGES,
   MMT_LABELS,
   MMT_OPTIONS,
+  SPASTICITY_LABELS,
+  SPASTICITY_OPTIONS,
+  GAIT_LABELS,
+  GAIT_OPTIONS,
   type Joint,
 } from "@/lib/config/clinical-parameters";
 
 interface ClinicalTableProps {
-  type: "rom" | "mmt";
+  type: "rom" | "mmt" | "spasticity" | "gait";
   data: Record<string, Record<string, string>>;
   onUpdate: (joint: string, movement: string, value: string) => void;
 }
@@ -26,7 +30,7 @@ export default function ClinicalTable({
   data,
   onUpdate,
 }: ClinicalTableProps) {
-  const labels = type === "rom" ? ROM_LABELS : MMT_LABELS;
+  const labels = type === "rom" ? ROM_LABELS : type === "mmt" ? MMT_LABELS : type === "spasticity" ? SPASTICITY_LABELS : GAIT_LABELS;
   const joints = Object.entries(labels);
 
   return (
@@ -34,12 +38,15 @@ export default function ClinicalTable({
       {joints.map(([joint, movements]) => (
         <div key={joint}>
           <h3 className="text-lg font-bold">
-            {joint.charAt(0).toUpperCase() + joint.slice(1)}
+            {type === "gait" 
+              ? joint.split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")
+              : joint.charAt(0).toUpperCase() + joint.slice(1)
+            }
           </h3>
           <div className="grid grid-cols-2 gap-10">
             {Object.entries(movements).map(([movement, value]) => (
               <div key={movement}>
-                <span className="text-sm font-medium">{value}</span>
+                <span className="text-sm font-medium">{value as string}</span>
                 {type === "rom" ? (
                   <Input
                     type="number"
@@ -75,7 +82,7 @@ export default function ClinicalTable({
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      {MMT_OPTIONS.map((opt) => (
+                      {(type === "mmt" ? MMT_OPTIONS : type === "spasticity" ? SPASTICITY_OPTIONS : GAIT_OPTIONS).map((opt) => (
                         <SelectItem key={opt.value} value={opt.value}>
                           {opt.label}
                         </SelectItem>

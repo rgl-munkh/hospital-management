@@ -12,12 +12,12 @@ import {
 } from "@/components/ui/card";
 import { Upload, X, FileImage, FileVideo } from "lucide-react";
 import { toast } from "sonner";
-import Image from "next/image";
 import { uploadToSupabaseStorage } from "@/lib/supabase-storage";
 import {
   saveMediaFile,
   fetchPatientMediaFiles,
 } from "@/lib/media-files/actions";
+import { MediaViewer } from "./media-viewer";
 
 interface MediaFile {
   file: File;
@@ -53,21 +53,12 @@ function ExistingMediaFiles({ files }: { files: ExistingMediaFile[] }) {
           <div key={media.id} className="border rounded-lg overflow-hidden">
             {/* Media Preview */}
             <div className="relative">
-              {media.type === "image" ? (
-                <Image
-                  src={media.url}
-                  alt={media.notes || "Media file"}
-                  width={200}
-                  height={200}
-                  className="w-full h-48 object-cover"
-                />
-              ) : (
-                <video
-                  src={media.url}
-                  className="w-full h-48 object-cover"
-                  muted
-                />
-              )}
+              <MediaViewer
+                src={media.url}
+                alt={media.notes || "Media file"}
+                type={media.type === "image" ? "image" : "video"}
+                className="w-full h-48"
+              />
             </div>
 
             {/* File Info */}
@@ -114,21 +105,12 @@ function MediaFilePreview({
     <div className="border rounded-lg overflow-hidden">
       {/* Media Preview */}
       <div className="relative">
-        {media.type === "image" ? (
-          <Image
-            src={media.preview}
-            alt={media.file.name}
-            width={200}
-            height={200}
-            className="w-full h-48 object-cover"
-          />
-        ) : (
-          <video
-            src={media.preview}
-            className="w-full h-48 object-cover"
-            muted
-          />
-        )}
+        <MediaViewer
+          src={media.preview}
+          alt={media.file.name}
+          type={media.type}
+          className="w-full h-48"
+        />
 
         {/* Remove button overlay */}
         <div className="absolute top-2 right-2">

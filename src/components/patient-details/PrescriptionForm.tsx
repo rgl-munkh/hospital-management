@@ -12,6 +12,7 @@ import { Textarea } from "../ui/textarea";
 import { toast } from "sonner";
 import { Dumbbell, Ruler } from "lucide-react";
 import ClinicalTable from "./clinical-table";
+import GaitAnalysisTable from "./gait-analysis-table";
 import OrthoticSelector from "./orthotic-selector";
 
 interface PrescriptionFormProps {
@@ -49,6 +50,47 @@ interface ClinicalParameters {
       flexion: string;
     };
   };
+  spasticity: {
+    ankle: {
+      dorsiflexion: string;
+      plantarflexion: string;
+    };
+    knee: {
+      flexion: string;
+      extension: string;
+    };
+    hip: {
+      extension: string;
+      flexion: string;
+    };
+  };
+  gaitAnalysis: {
+    "initial-contact-loading": {
+      ankle: string;
+      knee: string;
+    };
+    "loading-response-midstance": {
+      ankle: string;
+      knee: string;
+    };
+    "midstance-terminal-stance": {
+      ankle: string;
+      knee: string;
+      hip: string;
+    };
+    "terminal-stance-pre-swing": {
+      ankle: string;
+    };
+    "pre-swing-mid-swing": {
+      ankle: string;
+      knee: string;
+      hip: string;
+    };
+    "mid-swing-initial-contact": {
+      ankle: string;
+      knee: string;
+    };
+  };
   notes: string;
 }
 
@@ -74,6 +116,19 @@ export default function PrescriptionForm({
       ankle: { dorsiflexion: "", plantarflexion: "" },
       knee: { flexion: "", extension: "" },
       hip: { extension: "", flexion: "" },
+    },
+    spasticity: {
+      ankle: { dorsiflexion: "", plantarflexion: "" },
+      knee: { flexion: "", extension: "" },
+      hip: { extension: "", flexion: "" },
+    },
+    gaitAnalysis: {
+      "initial-contact-loading": { ankle: "", knee: "" },
+      "loading-response-midstance": { ankle: "", knee: "" },
+      "midstance-terminal-stance": { ankle: "", knee: "", hip: "" },
+      "terminal-stance-pre-swing": { ankle: "" },
+      "pre-swing-mid-swing": { ankle: "", knee: "", hip: "" },
+      "mid-swing-initial-contact": { ankle: "", knee: "" },
     },
     notes: "",
   });
@@ -125,6 +180,49 @@ export default function PrescriptionForm({
                 hip: {
                   extension: existingParams?.mmt?.hip?.extension || "",
                   flexion: existingParams?.mmt?.hip?.flexion || "",
+                },
+              },
+              spasticity: {
+                ankle: {
+                  dorsiflexion: existingParams?.spasticity?.ankle?.dorsiflexion || "",
+                  plantarflexion:
+                    existingParams?.spasticity?.ankle?.plantarflexion || "",
+                },
+                knee: {
+                  flexion: existingParams?.spasticity?.knee?.flexion || "",
+                  extension: existingParams?.spasticity?.knee?.extension || "",
+                },
+                hip: {
+                  extension:
+                    existingParams?.spasticity?.hip?.extension || "",
+                  flexion: existingParams?.spasticity?.hip?.flexion || "",
+                },
+              },
+              gaitAnalysis: {
+                "initial-contact-loading": {
+                  ankle: existingParams?.gaitAnalysis?.["initial-contact-loading"]?.ankle || "",
+                  knee: existingParams?.gaitAnalysis?.["initial-contact-loading"]?.knee || "",
+                },
+                "loading-response-midstance": {
+                  ankle: existingParams?.gaitAnalysis?.["loading-response-midstance"]?.ankle || "",
+                  knee: existingParams?.gaitAnalysis?.["loading-response-midstance"]?.knee || "",
+                },
+                "midstance-terminal-stance": {
+                  ankle: existingParams?.gaitAnalysis?.["midstance-terminal-stance"]?.ankle || "",
+                  knee: existingParams?.gaitAnalysis?.["midstance-terminal-stance"]?.knee || "",
+                  hip: existingParams?.gaitAnalysis?.["midstance-terminal-stance"]?.hip || "",
+                },
+                "terminal-stance-pre-swing": {
+                  ankle: existingParams?.gaitAnalysis?.["terminal-stance-pre-swing"]?.ankle || "",
+                },
+                "pre-swing-mid-swing": {
+                  ankle: existingParams?.gaitAnalysis?.["pre-swing-mid-swing"]?.ankle || "",
+                  knee: existingParams?.gaitAnalysis?.["pre-swing-mid-swing"]?.knee || "",
+                  hip: existingParams?.gaitAnalysis?.["pre-swing-mid-swing"]?.hip || "",
+                },
+                "mid-swing-initial-contact": {
+                  ankle: existingParams?.gaitAnalysis?.["mid-swing-initial-contact"]?.ankle || "",
+                  knee: existingParams?.gaitAnalysis?.["mid-swing-initial-contact"]?.knee || "",
                 },
               },
               notes: existingParams?.notes || "",
@@ -203,6 +301,32 @@ export default function PrescriptionForm({
     }));
   };
 
+  const updateSpasticity = (joint: string, movement: string, value: string) => {
+    setClinicalParams((prev) => ({
+      ...prev,
+      spasticity: {
+        ...prev.spasticity,
+        [joint]: {
+          ...prev.spasticity[joint as keyof typeof prev.spasticity],
+          [movement]: value,
+        },
+      },
+    }));
+  };
+
+  const updateGaitAnalysis = (phase: string, joint: string, value: string) => {
+    setClinicalParams((prev) => ({
+      ...prev,
+      gaitAnalysis: {
+        ...prev.gaitAnalysis,
+        [phase]: {
+          ...prev.gaitAnalysis[phase as keyof typeof prev.gaitAnalysis],
+          [joint]: value,
+        },
+      },
+    }));
+  };
+
   const updateOrthoticType = (value: string) => {
     setClinicalParams((prev) => ({ ...prev, orthoticType: value }));
   };
@@ -256,6 +380,48 @@ export default function PrescriptionForm({
               3-4 = <span className="text-yellow-600 font-semibold">Mild</span>,
               4-5 = <span className="text-green-600 font-semibold">Full</span>
             </div>
+
+            {/* Divider */}
+            <div className="border-t border-brand-100 my-4" />
+
+            {/* Spasticity Section */}
+            <div className="flex items-center gap-2 mb-2 mt-2">
+              <span className="font-semibold text-brand-700 flex items-center gap-1">
+                <Dumbbell size={18} className="inline-block" /> Muscle Spasticity Test
+              </span>
+              <span className="ml-2 text-xs text-gray-500">
+                Spasticity Scale = 0, 1, +1, 2, 3, 4
+              </span>
+            </div>
+            <ClinicalTable
+              type="spasticity"
+              data={clinicalParams.spasticity}
+              onUpdate={updateSpasticity}
+            />
+            <div className="text-xs text-gray-500 mt-2">
+              <span className="font-semibold text-brand-700">Spasticity Legend:</span>{" "}
+              0 = <span className="text-green-600 font-semibold">No spasticity</span>,
+              1/+1 = <span className="text-yellow-600 font-semibold">Weak spasticity</span>,
+              2 = <span className="text-orange-500 font-semibold">Moderate spasticity</span>,
+              3-4 = <span className="text-red-500 font-semibold">Strong spasticity</span>
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-brand-100 my-4" />
+
+            {/* Gait Analysis Section */}
+            <div className="flex items-center gap-2 mb-2 mt-2">
+              <span className="font-semibold text-brand-700 flex items-center gap-1">
+                <Dumbbell size={18} className="inline-block" /> Gait Analysis
+              </span>
+              <span className="ml-2 text-xs text-gray-500">
+                Gait cycle phases and joint patterns
+              </span>
+            </div>
+            <GaitAnalysisTable
+              data={clinicalParams.gaitAnalysis}
+              onUpdate={updateGaitAnalysis}
+            />
 
             {/* Orthotic Type Selector */}
             <OrthoticSelector
