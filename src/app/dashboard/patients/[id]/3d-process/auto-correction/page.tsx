@@ -25,8 +25,19 @@ import {
   HelpCircle,
   Monitor,
 } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 // Constants
@@ -225,7 +236,7 @@ export default function AutoCorrectionModelViewer() {
 
       // Check if auto-correction files already exist
       const existingScans = await fetchScansByTypeAndPatientId(
-        "auto-correction",
+        "corrected-mesh",
         patientId
       );
 
@@ -260,13 +271,13 @@ export default function AutoCorrectionModelViewer() {
 
       if (existingScans.length > 0) {
         // Update existing scan record
-        await updateScan(patientId, "auto-correction", response.publicUrl);
+        await updateScan(patientId, "corrected-mesh", response.publicUrl);
         toast.success("Auto-correction STL file updated successfully!");
       } else {
         // Create new scan record
         await createScan({
           patientId,
-          type: "auto-correction",
+          type: "corrected-mesh",
           fileUrl: response.publicUrl,
         });
         toast.success("Auto-correction STL file uploaded successfully!");
@@ -447,8 +458,9 @@ export default function AutoCorrectionModelViewer() {
               </TooltipTrigger>
               <TooltipContent className="max-w-sm">
                 <p>
-                  Upload and automatically correct 3D STL models for enhanced analysis. 
-                  The system will detect and fix common mesh issues like holes, non-manifold edges, and inverted normals.
+                  Upload and automatically correct 3D STL models for enhanced
+                  analysis. The system will detect and fix common mesh issues
+                  like holes, non-manifold edges, and inverted normals.
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -475,8 +487,8 @@ export default function AutoCorrectionModelViewer() {
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center gap-3">
               <AlertTriangle className="h-4 w-4 text-yellow-600" />
               <span className="text-sm text-yellow-800">
-                An auto-correction file already exists. Uploading a new file will
-                override the existing one.
+                An auto-correction file already exists. Uploading a new file
+                will override the existing one.
               </span>
             </div>
           )}
@@ -590,24 +602,24 @@ export default function AutoCorrectionModelViewer() {
                 <Canvas camera={{ position: [50, 50, 100], fov: 60 }}>
                   {/* Studio lighting setup */}
                   <ambientLight intensity={0.4} />
-                  <directionalLight 
-                    position={[50, 50, 50]} 
-                    intensity={0.8} 
-                    castShadow 
+                  <directionalLight
+                    position={[50, 50, 50]}
+                    intensity={0.8}
+                    castShadow
                     shadow-mapSize-width={2048}
                     shadow-mapSize-height={2048}
                   />
-                  <directionalLight 
-                    position={[-50, -50, -50]} 
-                    intensity={0.3} 
+                  <directionalLight
+                    position={[-50, -50, -50]}
+                    intensity={0.3}
                     color="#ffffff"
                   />
-                  <pointLight 
-                    position={[0, 100, 0]} 
-                    intensity={0.5} 
+                  <pointLight
+                    position={[0, 100, 0]}
+                    intensity={0.5}
                     color="#ffffff"
                   />
-                  <OrbitControls 
+                  <OrbitControls
                     enablePan={true}
                     enableZoom={true}
                     enableRotate={true}
@@ -649,7 +661,9 @@ export default function AutoCorrectionModelViewer() {
                 <div className="text-center">
                   <Monitor className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                   <p>No STL model available</p>
-                  <p className="text-sm text-gray-400">Please upload a file to view the 3D model</p>
+                  <p className="text-sm text-gray-400">
+                    Please upload a file to view the 3D model
+                  </p>
                 </div>
               </div>
             )}
