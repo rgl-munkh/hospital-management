@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { fetchAIRecommendation } from "@/lib/api/getAIRecommendation";
 import { Bot } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { Patient, Diagnosis, Prescription } from "@/lib/definitions";
 
 interface AiChatFormProps {
-  patient: any;
-  diagnosis: any;
-  prescription: any;
+  patient: Patient | null;
+  diagnosis: Diagnosis | null;
+  prescription: Prescription | null;
   startOnMount?: boolean;
 }
 
@@ -56,7 +57,7 @@ export default function AiChatForm({ patient, diagnosis, prescription, startOnMo
       const prompt = contextRef.current + "\nUser: " + input;
       const aiResponse = await fetchAIRecommendation("", prompt);
       setMessages((msgs) => [...msgs, { sender: "ai", text: aiResponse }]);
-    } catch (error) {
+    } catch {
       setMessages((msgs) => [...msgs, { sender: "ai", text: "Sorry, we could not fetch the AI advice at the moment." }]);
     }
     setLoading(false);

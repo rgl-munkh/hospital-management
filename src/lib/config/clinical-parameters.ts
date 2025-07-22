@@ -23,8 +23,8 @@ export const ROM_RANGES = {
     extension: { min: 0, max: 0, unit: "°" },
   },
   hip: {
-    extension: { min: 0, max: 15, unit: "°" },
-    flexion: { min: 0, max: 125, unit: "°" },
+    extension: { min: 0, max: 125, unit: "°" },
+    flexion: { min: 0, max: 15, unit: "°" },
   },
 } as const;
 
