@@ -248,13 +248,13 @@ export function StlViewCard({ patientId }: StlViewCardProps) {
     },
     "corrected-mesh": {
       label: "Corrected Scan",
-      color: "#10b981", // Green
+      color: "#D3D2D0", // Green
       route: "auto-correction",
       buttonText: "Auto Correct",
     },
     "final-mesh": {
       label: "Final Mesh",
-      color: "#A3DBD6", // Blue
+      color: "#93FFEA", // Blue
       route: "auto-modeling",
       buttonText: "Upload Scan",
     },
@@ -310,22 +310,22 @@ export function StlViewCard({ patientId }: StlViewCardProps) {
                           }}
                         >
                           {/* Studio lighting setup */}
-                          <ambientLight intensity={0.4} />
+                          <ambientLight intensity={0.6} />
                           <directionalLight
                             position={[50, 50, 50]}
-                            intensity={0.8}
+                            intensity={1.2}
                             castShadow
                             shadow-mapSize-width={2048}
                             shadow-mapSize-height={2048}
                           />
                           <directionalLight
                             position={[-50, -50, -50]}
-                            intensity={0.3}
+                            intensity={0.45}
                             color="#ffffff"
                           />
                           <pointLight
                             position={[0, 100, 0]}
-                            intensity={0.5}
+                            intensity={0.75}
                             color="#ffffff"
                           />
 
