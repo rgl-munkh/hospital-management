@@ -14,37 +14,54 @@ import { fetchScansByTypeAndPatientId } from "@/lib/scans/data";
 import { Scan } from "@/lib/definitions";
 import Link from "next/link";
 
+// TODO: Clean up this component
 interface StlViewCardProps {
   patientId?: string;
 }
 
 // Component to automatically scale and position mesh
-function AutoScaledMesh({ geometry, color }: { geometry: BufferGeometry; color: string }) {
+function AutoScaledMesh({
+  geometry,
+  color,
+  meshId,
+}: {
+  geometry: BufferGeometry;
+  color: string;
+  meshId?: string;
+}) {
   const meshRef = useRef<THREE.Mesh>(null);
-  
+
   useEffect(() => {
     if (meshRef.current && geometry) {
-      // Compute bounding box
-      geometry.computeBoundingBox();
-      const box = geometry.boundingBox; 
-      
-      if (box) {
-        const size = new THREE.Vector3();
-        box.getSize(size);
-        
-        // Calculate scale to fit in viewport (assuming 100 unit viewport)
-        const maxDimension = Math.max(size.x, size.y, size.z);
-        const scale = maxDimension > 0 ? 80 / maxDimension : 1;
-        
-        meshRef.current.scale.setScalar(scale);
-        
-        // Center the mesh
-        const center = new THREE.Vector3();
-        // box.getCenter(center);
-        meshRef.current.position.sub(center.multiplyScalar(scale));
+      try {
+        // Compute bounding box
+        geometry.computeBoundingBox();
+        const box = geometry.boundingBox;
+
+        if (box) {
+          const size = new THREE.Vector3();
+          box.getSize(size);
+
+          // Calculate scale to fit in viewport (assuming 100 unit viewport)
+          const maxDimension = Math.max(size.x, size.y, size.z);
+          const scale = maxDimension > 0 ? 80 / maxDimension : 1;
+
+          meshRef.current.scale.setScalar(scale);
+
+          // Center the mesh
+          const center = new THREE.Vector3();
+          // box.getCenter(center);
+          meshRef.current.position.sub(center.multiplyScalar(scale));
+        }
+      } catch (error) {
+        console.error('Error in AutoScaledMesh useEffect:', error);
       }
     }
-  }, [geometry]);
+  }, [geometry, meshId]);
+
+  if (!geometry) {
+    return null;
+  }
 
   return (
     <mesh ref={meshRef} geometry={geometry}>
@@ -55,6 +72,7 @@ function AutoScaledMesh({ geometry, color }: { geometry: BufferGeometry; color: 
 
 interface ScanData {
   geometry: BufferGeometry | null;
+  fixedMeshGeometry?: BufferGeometry | null;
   loading: boolean;
 }
 
@@ -78,6 +96,11 @@ export function StlViewCard({ patientId }: StlViewCardProps) {
       const loader = new STLLoader();
       const geometry = loader.parse(arrayBuffer);
 
+      // Validate geometry
+      if (!geometry || !geometry.attributes || !geometry.attributes.position) {
+        throw new Error(`Invalid geometry loaded for ${type}`);
+      }
+
       setScanData((prev) => ({
         ...prev,
         [type]: { geometry, loading: false },
@@ -88,6 +111,49 @@ export function StlViewCard({ patientId }: StlViewCardProps) {
       setScanData((prev) => ({
         ...prev,
         [type]: { ...prev[type], loading: false },
+      }));
+    }
+  }, []);
+
+  const loadFixedMeshGeometry = useCallback(async () => {
+    try {
+      console.log('Loading fixed mesh...');
+      const response = await fetch('/fixed-mesh.stl');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch fixed mesh: ${response.statusText}`);
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      const loader = new STLLoader();
+      const geometry = loader.parse(arrayBuffer);
+      
+      // Validate geometry
+      if (!geometry || !geometry.attributes || !geometry.attributes.position) {
+        throw new Error('Invalid geometry loaded from fixed mesh');
+      }
+      
+      console.log('Fixed mesh loaded successfully:', geometry);
+
+      setScanData((prev) => {
+        console.log('Setting fixed mesh geometry in state');
+        return {
+          ...prev,
+          'final-mesh': { 
+            ...prev['final-mesh'], 
+            fixedMeshGeometry: geometry,
+            loading: false
+          },
+        };
+      });
+    } catch (error) {
+      console.error('Failed to load fixed mesh geometry:', error);
+      toast.error('Failed to load fixed mesh');
+      setScanData((prev) => ({
+        ...prev,
+        'final-mesh': { 
+          ...prev['final-mesh'], 
+          loading: false 
+        },
       }));
     }
   }, []);
@@ -134,7 +200,16 @@ export function StlViewCard({ patientId }: StlViewCardProps) {
 
         // Load geometries in parallel
         const geometryPromises = scanResults.map(async ({ type, scans }) => {
-          if (scans.length > 0) {
+          if (type === 'final-mesh') {
+            // For final-mesh, always load the fixed mesh, and database mesh if available
+            const promises = [loadFixedMeshGeometry()];
+            
+            if (scans.length > 0) {
+              promises.push(loadScanGeometry(type, scans[0]));
+            }
+            
+            return Promise.all(promises);
+          } else if (scans.length > 0) {
             return loadScanGeometry(type, scans[0]);
           } else {
             setScanData((prev) => ({
@@ -179,7 +254,7 @@ export function StlViewCard({ patientId }: StlViewCardProps) {
     },
     "final-mesh": {
       label: "Final Mesh",
-      color: "#3b82f6", // Blue
+      color: "#A3DBD6", // Blue
       route: "auto-modeling",
       buttonText: "Upload Scan",
     },
@@ -225,42 +300,78 @@ export function StlViewCard({ patientId }: StlViewCardProps) {
                   </div>
 
                   <div className="w-full h-[400px] border border-border rounded-lg overflow-hidden relative bg-background">
-                    {data.geometry ? (
-                      <Canvas camera={{ position: [80, 80, 120], fov: 60 }}>
-                        {/* Studio lighting setup */}
-                        <ambientLight intensity={0.4} />
-                        <directionalLight
-                          position={[50, 50, 50]}
-                          intensity={0.8}
-                          castShadow
-                          shadow-mapSize-width={2048}
-                          shadow-mapSize-height={2048}
-                        />
-                        <directionalLight
-                          position={[-50, -50, -50]}
-                          intensity={0.3}
-                          color="#ffffff"
-                        />
-                        <pointLight
-                          position={[0, 100, 0]}
-                          intensity={0.5}
-                          color="#ffffff"
-                        />
+                    {data.geometry || (type === 'final-mesh' && data.fixedMeshGeometry) ? (
+                      <>
+                        <Canvas 
+                          key={`${type}-${patientId}`}
+                          camera={{ position: [80, 80, 120], fov: 60 }}
+                          onError={(error) => {
+                            console.error('Canvas error:', error);
+                          }}
+                        >
+                          {/* Studio lighting setup */}
+                          <ambientLight intensity={0.4} />
+                          <directionalLight
+                            position={[50, 50, 50]}
+                            intensity={0.8}
+                            castShadow
+                            shadow-mapSize-width={2048}
+                            shadow-mapSize-height={2048}
+                          />
+                          <directionalLight
+                            position={[-50, -50, -50]}
+                            intensity={0.3}
+                            color="#ffffff"
+                          />
+                          <pointLight
+                            position={[0, 100, 0]}
+                            intensity={0.5}
+                            color="#ffffff"
+                          />
 
-                        <OrbitControls
-                          enablePan={true}
-                          enableZoom={true}
-                          enableRotate={true}
-                          maxDistance={300}
-                          minDistance={20}
-                          target={[0, 0, 0]}
-                        />
+                          <OrbitControls
+                            enablePan={true}
+                            enableZoom={true}
+                            enableRotate={true}
+                            maxDistance={300}
+                            minDistance={20}
+                            target={[0, 0, 0]}
+                          />
 
-                        <AutoScaledMesh geometry={data.geometry} color={getTypeColor(type)} />
+                          {type === 'final-mesh' ? (
+                            <>
+                              {console.log('Rendering final-mesh, fixedMeshGeometry:', data.fixedMeshGeometry, 'geometry:', data.geometry)}
+                              {/* Render fixed mesh from public folder */}
+                              {data.fixedMeshGeometry && data.fixedMeshGeometry.attributes && data.fixedMeshGeometry.attributes.position && (
+                                <AutoScaledMesh
+                                  geometry={data.fixedMeshGeometry}
+                                  color="#D3D2D0"
+                                  meshId="fixed-mesh"
+                                />
+                              )}
+                              {/* Render mesh from database */}
+                              {data.geometry && data.geometry.attributes && data.geometry.attributes.position && (
+                                <AutoScaledMesh
+                                  geometry={data.geometry}
+                                  color={getTypeColor(type)}
+                                  meshId="database-mesh"
+                                />
+                              )}
+                            </>
+                          ) : (
+                            data.geometry && data.geometry.attributes && data.geometry.attributes.position && (
+                              <AutoScaledMesh
+                                geometry={data.geometry}
+                                color={getTypeColor(type)}
+                                meshId={type}
+                              />
+                            )
+                          )}
 
-                        <axesHelper args={[100]} />
-                        <gridHelper args={[500, 50]} />
-                      </Canvas>
+                          <axesHelper args={[100]} />
+                          <gridHelper args={[500, 50]} />
+                        </Canvas>
+                      </>
                     ) : (
                       <div className="flex items-center justify-center h-full">
                         {data.loading ? (
@@ -302,13 +413,32 @@ export function StlViewCard({ patientId }: StlViewCardProps) {
 
                     {/* Legend */}
                     <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg">
-                      <div className="flex items-center gap-2 text-sm">
-                        <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: getTypeColor(type) }}
-                        ></div>
-                        <span>{getTypeLabel(type)}</span>
-                      </div>
+                      {type === 'final-mesh' ? (
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm">
+                            <div
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: "#ff6b6b" }}
+                            ></div>
+                            <span>Fixed Mesh</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <div
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: getTypeColor(type) }}
+                            ></div>
+                            <span>Database Mesh</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 text-sm">
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: getTypeColor(type) }}
+                          ></div>
+                          <span>{getTypeLabel(type)}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
