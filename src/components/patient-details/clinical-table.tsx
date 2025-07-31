@@ -17,7 +17,7 @@ import {
   GAIT_LABELS,
   GAIT_OPTIONS,
   type Joint,
-} from "@/lib/config/clinical-parameters";
+} from "@/constants/clinical-parameters";
 
 interface ClinicalTableProps {
   type: "rom" | "mmt" | "spasticity" | "gait";

@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { GAIT_LABELS, GAIT_OPTIONS } from "@/lib/config/clinical-parameters";
+import { GAIT_LABELS, GAIT_OPTIONS } from "@/constants/clinical-parameters";
 
 interface GaitAnalysisTableProps {
   data: Record<string, Record<string, string>>;

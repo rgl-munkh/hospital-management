@@ -27,7 +27,7 @@ import {
 import { DataTablePagination } from "./data-table-pagination";
 import { DataTableToolbar } from "./data-table-toolbar";
 import { useState } from "react";
-import { TableConfig } from "@/lib/table-factory";
+import { TableConfig } from "@/constants/table-factory";
 
 export interface FilterOption {
   label: string;

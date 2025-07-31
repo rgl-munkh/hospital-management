@@ -3,7 +3,7 @@
 import { DataTable } from "@/components/data-table";
 import { columns } from "./columns";
 import { Hospital } from "@/lib/definitions";
-import { hospitalTableConfig } from "@/lib/table-configs";
+import { hospitalTableConfig } from "@/constants/table-configs";
 
 interface HospitalsTableProps {
   hospitals: Hospital[];

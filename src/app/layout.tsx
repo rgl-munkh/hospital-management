@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { manrope } from "@/lib/fonts";
+import { manrope } from "@/constants/fonts";
 import "./globals.css";
 import { Toaster } from "sonner";
 

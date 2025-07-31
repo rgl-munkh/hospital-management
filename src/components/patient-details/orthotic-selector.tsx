@@ -1,6 +1,6 @@
 import React from "react";
 import Image from "next/image";
-import { ORTHOTIC_TYPE_OPTIONS } from "@/lib/config/clinical-parameters";
+import { ORTHOTIC_TYPE_OPTIONS } from "@/constants/clinical-parameters";
 
 interface OrthoticSelectorProps {
   value: string;
