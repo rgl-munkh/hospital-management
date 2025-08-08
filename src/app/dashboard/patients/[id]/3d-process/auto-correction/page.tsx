@@ -406,11 +406,12 @@ export default function AutoCorrectionModelViewer() {
       formData.append("file", stlFile);
 
       // Make POST request to auto-correction endpoint
-      const endpoint = process.env.AUTO_CORRECTION_ENDPOINT + "/fix-mesh";
-      if (!endpoint) {
+      const baseEndpoint = process.env.NEXT_PUBLIC_AUTO_CORRECTION_ENDPOINT;
+      if (!baseEndpoint) {
         toast.error("Auto-correction endpoint not configured.");
         return;
       }
+      const endpoint = `${baseEndpoint.replace(/\/+$, "")}/fix-mesh`;
 
       const response = await fetch(endpoint, {
         method: "POST",
