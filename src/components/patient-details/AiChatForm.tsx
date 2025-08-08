@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect, useRef } from "react";
 import { fetchAIRecommendation } from "@/lib/api/getAIRecommendation";
 import { Bot } from "lucide-react";
