@@ -33,6 +33,11 @@ function ThreeDProcessNav() {
       description: "Landmark the 3D model",
     },
     {
+      href: "test",
+      label: "Test",
+      description: "Test Grasshopper definition",
+    },
+    {
       href: "anatomy-fixing",
       label: "Anatomy Fixing",
       description: "Anatomical fixing the 3D model",

@@ -266,8 +266,30 @@ export default function LandmarkModelViewer() {
     URL.revokeObjectURL(url);
   };
 
-  const onHandleRhinoCompute = () => {
-    toast.info("Rhino Compute is not implemented yet");
+  const onHandleRhinoCompute = async () => {
+    try {
+      const res = await fetch('/api/gh-clash', {
+        method: 'POST',
+      });
+      if (!res.ok) throw new Error('Request failed');
+      const data = await res.json();
+      console.log(data)
+    } catch (err) {
+      console.error(err);
+    } 
+    // toast.info("Rhino Compute is not implemented yet");
+  };
+
+  const onHandleRhinoGh = async () => {
+    try {
+      const res = await fetch('/api/grasshopper', { method: 'POST'});
+      if (!res.ok) throw new Error('Request failed');
+      const data = await res.json();
+      console.log(data)
+    } catch (err) {
+      console.error(err);
+    } 
+    // toast.info("Rhino Compute is not implemented yet");
   };
 
   return (
@@ -332,6 +354,15 @@ export default function LandmarkModelViewer() {
               className="w-full"
             >
               Compute
+            </Button>
+            <Button
+              onClick={onHandleRhinoGh}
+              disabled={landmarks.length === 0}
+              variant="outline"
+              size="sm"
+              className="w-full"
+            >
+              Run Grasshopper
             </Button>
           </div>
 
